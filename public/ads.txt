@@ -1,3 +1,1 @@
-# Placeholder ads.txt for custom .me root domain.
-# Replace with your verified Google AdSense publisher record before enabling ads:
-# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+google.com, pub-5975753455053538, DIRECT, f08c47fec0942fa0
