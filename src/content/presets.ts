@@ -29,19 +29,19 @@ export const PRESET_EDITORIAL: Record<PresetId, PresetEditorial> = {
       "Daily Scale: 2,000 requests/day across 16 active hours/day (60,000 requests/month on a 30-day basis).",
     ],
     cachingStrategy:
-      "With an 1,800-token static prefix, this preset exceeds OpenAI's 1,024-token minimum, Anthropic's 512-token minimum (5.x models), and Mistral's 64-token block minimum—while falling short of Gemini's 4,096-token implicit/explicit threshold. At an 85% cache hit rate and 12 cold writes/hour (192 writes/day), cache reads drop to 0.02x–0.10x input price depending on provider.",
+      "With an 1,800-token static prefix, this preset exceeds OpenAI's 1,024-token minimum, Anthropic's 1,024-token minimum (Claude 3.5 Sonnet), and DeepSeek's 64-token block minimum—while falling short of Gemini's 32,768-token explicit threshold. At an 85% cache hit rate and 12 cold writes/hour (192 writes/day), cache reads drop by 50% to 90% depending on provider.",
     batchGuidance:
       "Live user-facing RAG Q&A requires sub-second to few-second latency, so Batch API (up to 24h turnaround) is turned off by default. Use Batch only for offline RAG evaluation suites or overnight knowledge-base indexing QA runs.",
     workedExampleNote:
-      "Under default RAG Q&A parameters (1,800 prefix / 3,200 dynamic / 450 output, 2,000 req/day, 85% hit, 12 writes/hr over 16h), Claude Sonnet 5.5 ($2.00 in / $10.00 out / $0.10 read / $2.50 5m write) and GPT-6.1 Sol ($2.00 in / $10.00 out / $0.10 read / $2.50 30m write) both total $23.36/day ($700.76/mo) vs. $870.00/mo uncached—saving $169.24/mo (19.5%). Routing the same traffic to Claude Haiku 5.5 ($0.10 in / $0.50 out / $0.01 read / $0.125 5m write) drops the bill to $1.18/day ($35.50/mo vs. $43.50/mo uncached).",
+      "Under default RAG Q&A parameters (1,800 prefix / 3,200 dynamic / 450 output, 2,000 req/day, 85% hit, 12 writes/hr over 16h), Claude 3.5 Sonnet ($3.00 in / $15.00 out / $0.30 read / $3.75 5m write) and GPT-4o ($2.50 in / $10.00 out / $1.25 read / free write) show substantial savings vs uncached traffic. Routing high-volume traffic to Claude 3.5 Haiku ($0.80 in / $4.00 out / $0.08 read) or DeepSeek-V3 ($0.14 in / $0.28 out / $0.014 read) drops monthly bills by over 80%.",
     pitfallWarning:
-      "Do not inflate retrieved chunk counts carelessly: dynamic RAG chunks are uncached on every query and dominate the bill (~64% of input tokens here). Also note Gemini models require at least 4,096 prefix tokens to activate caching, so a 1,800-token RAG system prompt receives zero cache discount on Gemini.",
+      "Do not inflate retrieved chunk counts carelessly: dynamic RAG chunks are uncached on every query and dominate the bill (~64% of input tokens here). Also note Gemini models require at least 32,768 prefix tokens to activate context caching, so a 1,800-token RAG system prompt receives zero cache discount on Gemini.",
   },
   "code-generation": {
     slug: "code-generation",
     title: "Code Generation & AI IDE Agent Cost Comparison",
     metaDescription:
-      "Model prompt caching, 5m vs 1h write surcharges, and output-token dominance for AI code generation and repository-aware coding workflows.",
+      "Model prompt caching, 5m write surcharges, and output-token dominance for AI code generation and repository-aware coding workflows.",
     summary:
       "Repository-aware code generation sends a large cacheable project context—repo map, architecture rules, and tool definitions (12,000 tokens)—plus active file diffs (2,500 dynamic tokens) and generates long code + reasoning output (1,600 tokens) at 500 requests/day.",
     tokenAnatomy: [
@@ -51,19 +51,19 @@ export const PRESET_EDITORIAL: Record<PresetId, PresetEditorial> = {
       "Daily Scale: 500 requests/day over 16 active hours/day (15,000 requests/month).",
     ],
     cachingStrategy:
-      "Because the 12,000-token repo prefix makes up 82.8% of total input tokens and exceeds every provider's minimum cache threshold (including Gemini's 4,096 tokens), prompt caching is essential. With 80% cache hits and 4 cold writes/hour (64 writes/day), providers with 95%–98% cache-read discounts (GPT-6.1 Sol, Claude Sonnet 5.5, DeepSeek V4.1 Flash) dramatically slash input spend.",
+      "Because the 12,000-token repo prefix makes up 82.8% of total input tokens and exceeds OpenAI, Anthropic, and DeepSeek cache minimums, prompt caching is essential. With 80% cache hits and 4 cold writes/hour (64 writes/day), providers with 90% cache-read discounts (Claude 3.5 Sonnet, DeepSeek-V3) dramatically slash input spend.",
     batchGuidance:
       "Interactive IDE edits cannot wait for 24-hour Batch queues, so Batch API is off by default. Enable Batch only for asynchronous overnight PR test generation, repo-wide lint/migration sweeps, or CI benchmark evaluations.",
     workedExampleNote:
-      "At 12,000 prefix / 2,500 dynamic / 1,600 output and 500 req/day (80% hit, 4 writes/hr over 16h), Claude Sonnet 5.5 ($2.00/$10.00, $0.10 read, $2.50 5m write) costs $13.76/day ($412.92/mo) compared to $675.00/mo uncached—saving $262.08/mo (38.8%). Notice that output tokens ($240.00/mo on Sonnet 5.5) still account for 58.1% of the cached bill.",
+      "At 12,000 prefix / 2,500 dynamic / 1,600 output and 500 req/day (80% hit, 4 writes/hr over 16h), Claude 3.5 Sonnet ($3.00/$15.00, $0.30 read, $3.75 5m write) saves over 35% compared to uncached queries. Notice that output tokens ($15.00/1M on Sonnet) account for the majority of the cached bill.",
     pitfallWarning:
-      "Watch two hidden multipliers in coding agents: (1) frequent edits to files placed inside the cached prefix trigger repeated 1.25x–2.50x cache writes; keep volatile diffs at the end of the prompt after static instructions; (2) Claude 4.7+ uses a newer tokenizer that produces roughly 30% more tokens for identical text/code compared to older Claude 4.6 tokenizers.",
+      "Watch two hidden multipliers in coding agents: (1) frequent edits to files placed inside the cached prefix trigger repeated cache writes; keep volatile diffs at the end of the prompt after static instructions; (2) reasoning models (like o1 and DeepSeek-R1) bill internal thinking tokens at the higher output rate.",
   },
   "document-summarization": {
     slug: "document-summarization",
     title: "Long-Context Document Summarization & Batch API Cost Guide",
     metaDescription:
-      "Estimate long-context PDF and contract summarization costs with Batch API discounts, minimum cache thresholds, and >100K/>200K/>272K context cliffs.",
+      "Estimate long-context PDF and contract summarization costs with Batch API discounts, minimum cache thresholds, and tiered context cliffs.",
     summary:
       "Bulk document summarization processes large unique payloads (45,000 dynamic tokens per PDF/contract) with a lightweight instruction header (600 prefix tokens) and structured summaries (1,200 output tokens) at 300 documents/day—making asynchronous Batch API the primary cost lever.",
     tokenAnatomy: [
@@ -73,13 +73,13 @@ export const PRESET_EDITORIAL: Record<PresetId, PresetEditorial> = {
       "Daily Scale: 300 documents/day across 24 hours/day (9,000 documents/month).",
     ],
     cachingStrategy:
-      "Cache hit rate defaults to 10% because every document is unique. Furthermore, the 600-token instruction prefix is below OpenAI's 1,024-token and Gemini's 4,096-token minimums, so caching only activates on Anthropic 5.x (512-token min) and Mistral (64-token min). Caching matters here only if you run multiple distinct prompts against the *same* 45,000-token document.",
+      "Cache hit rate defaults to 10% because every document is unique. Furthermore, the 600-token instruction prefix is below OpenAI's 1,024-token and Gemini's 32k-token minimums. Caching matters here only if you run multiple distinct prompts against the *same* 45,000-token document.",
     batchGuidance:
-      "Document pipelines are typically asynchronous, making Batch API ideal. However, verified Batch discounts vary sharply by provider: OpenAI, Anthropic, Mistral, and Gemini offer 50% off (with Gemini 3.1 Pro Preview excluding cache reads/storage from Batch discount), Bedrock gives 25% off on Mistral Large 2 and N/A on Claude 5.x, DeepSeek offers 50% Off-Peak scheduling instead of Batch, and Together AI charges 0% discount (standard rates) for serverless chat models.",
+      "Document pipelines are typically asynchronous, making Batch API ideal. OpenAI, Anthropic, Mistral, and Gemini offer 50% off with 24-hour turnaround, while DeepSeek offers 50% Off-Peak scheduling (16:30 - 00:30 UTC daily) instead of Batch.",
     workedExampleNote:
-      "At 600 prefix / 45,000 dynamic / 1,200 output and 300 docs/day with Batch enabled, Claude Haiku 5.5 ($0.10/$0.50 base, 50% Batch stacking with 512-tok caching) costs $0.77/day ($23.20/mo vs. $46.44/mo sync uncached). Mistral Large 4 (50% Batch, caching disabled in Batch) costs $5.17/day ($154.98/mo vs. $309.96/mo). Gemini 3.8 Flash (promotional $0.75/$3.75 through 2026-12-31, 50% Batch, prefix < 4,096 so uncached) costs $5.80/day ($174.15/mo vs. $348.30/mo), jumping 2x on 2027-01-01.",
+      "At 600 prefix / 45,000 dynamic / 1,200 output and 300 docs/day with Batch enabled (50% discount), Gemini 1.5 Flash ($0.075/$0.30 base) costs under $0.50/day ($15/mo), while GPT-4o-mini ($0.15/$0.60 base) costs ~$1.20/day ($36/mo).",
     pitfallWarning:
-      "If documents grow past 100K tokens on Claude Haiku 5.5, total input crosses Haiku's long-context cliff and jumps 5x from $0.10/$0.50 to $0.50/$2.50 per 1M tokens for the entire request. Above 200K (Gemini 3.1 Pro Preview) or 272K (OpenAI GPT-6/6.1), long-context surcharges also apply to the full prompt—whereas Claude Sonnet 5.5, Claude Fable 5.2, and Gemini 3.8 Flash/4 Carbon stay flat up to 1M.",
+      "Check whether your provider charges higher rates for long context: Gemini 1.5 Pro doubles its input rate from $1.25 to $2.50 per 1M for prompts exceeding 128,000 tokens.",
   },
   "support-agent": {
     slug: "support-agent",
@@ -95,19 +95,19 @@ export const PRESET_EDITORIAL: Record<PresetId, PresetEditorial> = {
       "Daily Scale: 1,500 sessions/day × 5 turns = 7,500 API turns/day over 16 active hours/day (225,000 turns/month).",
     ],
     cachingStrategy:
-      "Multi-turn agents live or die by prompt caching because Turns 2–5 re-send prior turns verbatim as a growing prefix. At 75% cache hit rate and 12 cold writes/hour across 16 hours, caching cuts monthly costs by ~44%–47%. Watch Gemini 4 Carbon's explicit-cache absence and implicit multi-turn rule: a turn must add at least 2,050 new tokens to extend the cached prefix—otherwise the trailing 2,050 tokens are billed uncached.",
+      "Multi-turn agents live or die by prompt caching because Turns 2–5 re-send prior turns verbatim as a growing prefix. At 75% cache hit rate and 12 cold writes/hour across 16 hours, caching cuts monthly costs by ~40%–50%.",
     batchGuidance:
       "Live customer chat requires real-time streaming responses, so Batch API is disabled by default. Batch is only applicable to post-chat QA auditing, sentiment tagging, or CSAT classification.",
     workedExampleNote:
-      "For 1,500 5-turn sessions/day (4,600 avg input/turn, 350 output/turn, 75% hit, 12 writes/hr over 16h), Claude Sonnet 5.5 costs $50.77/day ($1,522.97/mo) with caching vs. $2,857.50/mo uncached—saving $1,334.53/mo (46.7%). Switching to a lightweight tier like GPT-6 Luna ($0.10/$0.50, $0.01 read, $0.125 30m write) drops the same 225,000-turn monthly load to $2.66/day ($79.69/mo vs. $142.88/mo uncached).",
+      "For 1,500 5-turn sessions/day (4,600 avg input/turn, 350 output/turn, 75% hit, 12 writes/hr over 16h), Claude 3.5 Haiku ($0.80/$4.00, $0.08 read) or GPT-4o-mini ($0.15/$0.60, $0.075 read) keeps total monthly spend under $150/mo, whereas uncached frontier models easily exceed $2,500/mo.",
     pitfallWarning:
-      "Never estimate a 5-turn agent by multiplying single-turn tokens by 5: quadratic history accumulation makes Turn 5 nearly 1.8x larger than Turn 1. On long 15–20 turn sessions, cap or summarize history before crossing model cliffs like Haiku 5.5's >100K 5x jump.",
+      "Never estimate a 5-turn agent by multiplying single-turn tokens by 5: quadratic history accumulation makes Turn 5 nearly 1.8x larger than Turn 1. On long 15–20 turn sessions, cap or summarize history to avoid ballooning token costs.",
   },
   extraction: {
     slug: "extraction",
     title: "High-Volume JSON Extraction & ETL LLM Cost Comparison",
     metaDescription:
-      "Optimize high-volume structured extraction (10,000 req/day) using 1-hour prompt caching, Batch API discounts, and fast open-weight hosts.",
+      "Optimize high-volume structured extraction (10,000 req/day) using prompt caching, Batch API discounts, and fast open-weight hosts.",
     summary:
       "Structured ETL and invoice/document extraction pairs a strict JSON schema & few-shot prefix (1,200 tokens) with incoming raw payloads (1,800 dynamic tokens) and compact JSON output (250 tokens) at 10,000 requests/day—maximizing both cache reuse and Batch savings.",
     tokenAnatomy: [
@@ -117,12 +117,12 @@ export const PRESET_EDITORIAL: Record<PresetId, PresetEditorial> = {
       "Daily Scale: 10,000 requests/day across 24 hours/day (300,000 requests/month).",
     ],
     cachingStrategy:
-      "Because all 10,000 daily jobs share the exact same 1,200-token schema prefix, cache hit rate defaults to 90% with 1 cold write/hour (24 writes/day) on a 1h TTL. Even with Anthropic's 2.0x 1-hour write rate ($0.20/1M on Haiku 5.5), 24 daily writes cost pennies while 90% cache reads save substantially on 360M monthly prefix tokens.",
+      "Because all 10,000 daily jobs share the exact same 1,200-token schema prefix, cache hit rate defaults to 90% with 1 cold write/hour on a persistent cache. 90% cache reads save substantially on 360M monthly prefix tokens.",
     batchGuidance:
-      "ETL pipelines are the textbook Batch API workload: 24-hour turnaround slashes input and output costs by 50% on Anthropic (stacking with 1h caching), OpenAI GPT-5/6.x (stacking with caching), Mistral (50% off without Batch caching), and Amazon Bedrock open-weight models like gpt-oss-120b (50% off without caching). Avoid Together AI for serverless chat Batch if expecting a discount (0% Batch discount), and remember Groq Batch does NOT stack with prompt caching.",
+      "ETL pipelines are the textbook Batch API workload: 24-hour turnaround slashes input and output costs by 50% on Anthropic (stacking with caching), OpenAI (stacking with caching), and Mistral.",
     workedExampleNote:
-      "At 10,000 req/day (1,200 prefix / 1,800 dynamic / 250 output, 90% hit, 1 write/hr, 1h TTL, Batch ON), Claude Haiku 5.5 (50% Batch stacking with 1h caching) costs $1.64/day ($49.21/mo vs. $127.50/mo sync uncached—61.4% savings) and GPT-6 Luna stacks 50% Batch with caching for $1.64/day ($49.23/mo). Mistral Small 4 (50% Batch, prompt caching disabled in Batch) costs $3.00/day ($90.00/mo vs. $180.00/mo). By contrast, Together AI's DeepSeek-V4.1-Flash charges standard rates in Batch (0% discount, caching active), landing at $8.82/day ($264.74/mo).",
+      "At 10,000 req/day (1,200 prefix / 1,800 dynamic / 250 output, 90% hit, 1 write/hr, Batch ON), Claude 3.5 Haiku (50% Batch stacking with caching) costs ~$1.70/day (~$50/mo vs. $130/mo sync uncached—over 60% savings), and GPT-4o-mini delivers comparable sub-$50/month pricing.",
     pitfallWarning:
-      "Check both Batch-discount eligibility and cache-stacking rules before assuming 50% off: Together AI runs serverless chat Batch jobs at standard 100% rates, Amazon Bedrock lists Claude 5.x models as N/A for Batch (and disables caching in Batch for all models), and DeepSeek has no Batch API (requiring scheduling outside Peak UTC hours for 50% Off-Peak rates).",
+      "Check both Batch-discount eligibility and cache-stacking rules before assuming 50% off: Together AI runs serverless chat at standard rates (0% Batch discount), and DeepSeek has no Batch API (requiring scheduling outside Peak UTC hours for 50% Off-Peak rates).",
   },
 };

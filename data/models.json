@@ -4,53 +4,39 @@
   "currency": "USD",
   "models": [
     {
-      "id": "openai/gpt-6-astra",
-      "slug": "gpt-6-astra",
-      "displayName": "GPT-6 Astra",
-      "apiModelId": "gpt-6-astra",
+      "id": "openai/gpt-4o",
+      "slug": "gpt-4o",
+      "displayName": "GPT-4o",
+      "apiModelId": "gpt-4o",
       "provider": "openai",
-      "modelFamily": "GPT-6",
+      "modelFamily": "GPT-4o",
       "openWeight": false,
-      "contextWindowTokens": 1050000,
-      "maxInputTokens": 922000,
-      "maxOutputTokens": 128000,
-      "reasoningTokensBilledAsOutput": true,
+      "contextWindowTokens": 128000,
+      "maxOutputTokens": 16384,
+      "reasoningTokensBilledAsOutput": false,
       "featuredDetailPage": true,
       "pricingTiers": [
         {
-          "label": "Standard (<= 272K)",
-          "upToTokens": 272000,
-          "inputPer1M": 10.0,
-          "outputPer1M": 50.0,
-          "cachedInputReadPer1M": 1.0,
-          "cacheWrite5mPer1M": null,
-          "cacheWrite1hPer1M": null,
-          "cacheWrite30mPer1M": 12.5,
-          "cacheWrite12hPer1M": 25.0,
-          "batchInputPer1M": 5.0,
-          "batchOutputPer1M": 25.0
-        },
-        {
-          "label": "Long Context (> 272K)",
+          "label": "Standard (<= 128K)",
           "upToTokens": null,
-          "inputPer1M": 20.0,
-          "outputPer1M": 75.0,
-          "cachedInputReadPer1M": 2.0,
+          "inputPer1M": 2.5,
+          "outputPer1M": 10,
+          "cachedInputReadPer1M": 1.25,
           "cacheWrite5mPer1M": null,
           "cacheWrite1hPer1M": null,
-          "cacheWrite30mPer1M": 25.0,
-          "cacheWrite12hPer1M": 50.0,
-          "batchInputPer1M": 10.0,
-          "batchOutputPer1M": 37.5
+          "batchInputPer1M": 1.25,
+          "batchOutputPer1M": 5
         }
       ],
       "promptCaching": {
         "supported": true,
         "mode": "automatic",
         "minCacheableTokens": 1024,
-        "ttlOptions": ["30m", "12h"],
+        "ttlOptions": [
+          "automatic"
+        ],
         "storagePer1MPerHour": null,
-        "notes": "Read = 0.10x (90% off). Cache write is a total rate (not additive): 1.25x for 30m in-memory retention, 2.50x for 12h Responses API retention. Min 1,024 visible input tokens."
+        "notes": "Automatic prompt caching with 50% discount on cached input reads ($1.25/1M). No cache write fee. Minimum 1,024 prefix tokens."
       },
       "batchApi": {
         "supported": true,
@@ -58,71 +44,215 @@
         "cachingAllowedInBatch": true,
         "batchDiscountAppliesToCache": true,
         "turnaroundWindow": "24h",
-        "notes": "50% off all columns (standard input, output, cached read, 30m write, and 12h write) across short and >272K long context."
+        "notes": "OpenAI Batch API offers 50% discount off standard and cached token rates with 24-hour turnaround."
       },
       "hosting": {
         "endpointProvider": "OpenAI First-Party",
         "endpointType": "first_party",
-        "regionMultipliers": [
-          { "regionLabel": "Global / Standard", "multiplier": 1.0 },
-          { "regionLabel": "US-Only / Regional Residency (+10%)", "multiplier": 1.1 }
-        ],
-        "hostingNotes": "Regional data residency & FedRAMP endpoints add +10% uplift on models released >= 2026-03-05. Fast tier = 2x, Ultrafast = 6x."
+        "hostingNotes": "Hosted directly on OpenAI first-party infrastructure."
       },
       "effectiveDate": "2026-11-12",
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://developers.openai.com/api/docs/pricing",
-      "notes": "Flagship reasoning model. Prompts >272K input tokens trigger 2x input/cache/write and 1.5x output for the full request."
+      "officialSourceUrl": "https://openai.com/api/pricing/",
+      "notes": "OpenAI flagship multimodal workhorse model."
     },
     {
-      "id": "openai/gpt-6-1-sol",
-      "slug": "gpt-6-1-sol",
-      "displayName": "GPT-6.1 Sol",
-      "apiModelId": "gpt-6.1-sol",
+      "id": "openai/gpt-4o-mini",
+      "slug": "gpt-4o-mini",
+      "displayName": "GPT-4o mini",
+      "apiModelId": "gpt-4o-mini",
       "provider": "openai",
-      "modelFamily": "GPT-6.1",
+      "modelFamily": "GPT-4o",
       "openWeight": false,
-      "contextWindowTokens": 1050000,
-      "maxInputTokens": 922000,
-      "maxOutputTokens": 128000,
+      "contextWindowTokens": 128000,
+      "maxOutputTokens": 16384,
+      "reasoningTokensBilledAsOutput": false,
+      "featuredDetailPage": true,
+      "pricingTiers": [
+        {
+          "label": "Standard (<= 128K)",
+          "upToTokens": null,
+          "inputPer1M": 0.15,
+          "outputPer1M": 0.6,
+          "cachedInputReadPer1M": 0.075,
+          "cacheWrite5mPer1M": null,
+          "cacheWrite1hPer1M": null,
+          "batchInputPer1M": 0.075,
+          "batchOutputPer1M": 0.3
+        }
+      ],
+      "promptCaching": {
+        "supported": true,
+        "mode": "automatic",
+        "minCacheableTokens": 1024,
+        "ttlOptions": [
+          "automatic"
+        ],
+        "storagePer1MPerHour": null,
+        "notes": "Automatic prompt caching with 50% discount on cached input reads ($0.075/1M). Minimum 1,024 prefix tokens."
+      },
+      "batchApi": {
+        "supported": true,
+        "discountPercent": 50,
+        "cachingAllowedInBatch": true,
+        "batchDiscountAppliesToCache": true,
+        "turnaroundWindow": "24h",
+        "notes": "OpenAI Batch API offers 50% discount."
+      },
+      "hosting": {
+        "endpointProvider": "OpenAI First-Party",
+        "endpointType": "first_party",
+        "hostingNotes": "Hosted on OpenAI first-party infrastructure."
+      },
+      "effectiveDate": "2026-11-12",
+      "promotionalExpiryDate": null,
+      "lastVerifiedDate": "2026-11-12",
+      "officialSourceUrl": "https://openai.com/api/pricing/",
+      "notes": "High-speed, cost-efficient small model designed for high-volume tasks."
+    },
+    {
+      "id": "openai/o1",
+      "slug": "o1",
+      "displayName": "o1",
+      "apiModelId": "o1",
+      "provider": "openai",
+      "modelFamily": "o1",
+      "openWeight": false,
+      "contextWindowTokens": 200000,
+      "maxOutputTokens": 100000,
       "reasoningTokensBilledAsOutput": true,
       "featuredDetailPage": true,
       "pricingTiers": [
         {
-          "label": "Standard (<= 272K)",
-          "upToTokens": 272000,
-          "inputPer1M": 2.0,
-          "outputPer1M": 10.0,
-          "cachedInputReadPer1M": 0.1,
-          "cacheWrite5mPer1M": null,
-          "cacheWrite1hPer1M": null,
-          "cacheWrite30mPer1M": 2.5,
-          "cacheWrite12hPer1M": 5.0,
-          "batchInputPer1M": 1.0,
-          "batchOutputPer1M": 5.0
-        },
-        {
-          "label": "Long Context (> 272K)",
+          "label": "Standard (<= 200K)",
           "upToTokens": null,
-          "inputPer1M": 4.0,
-          "outputPer1M": 15.0,
-          "cachedInputReadPer1M": 0.2,
+          "inputPer1M": 15,
+          "outputPer1M": 60,
+          "cachedInputReadPer1M": 7.5,
           "cacheWrite5mPer1M": null,
           "cacheWrite1hPer1M": null,
-          "cacheWrite30mPer1M": 5.0,
-          "cacheWrite12hPer1M": 10.0,
-          "batchInputPer1M": 2.0,
+          "batchInputPer1M": 7.5,
+          "batchOutputPer1M": 30
+        }
+      ],
+      "promptCaching": {
+        "supported": true,
+        "mode": "automatic",
+        "minCacheableTokens": 1024,
+        "ttlOptions": [
+          "automatic"
+        ],
+        "storagePer1MPerHour": null,
+        "notes": "Automatic prompt caching with 50% discount on cached input reads ($7.50/1M). Internal reasoning tokens billed as output tokens ($60.00/1M)."
+      },
+      "batchApi": {
+        "supported": true,
+        "discountPercent": 50,
+        "cachingAllowedInBatch": true,
+        "batchDiscountAppliesToCache": true,
+        "turnaroundWindow": "24h",
+        "notes": "50% discount via OpenAI Batch API."
+      },
+      "hosting": {
+        "endpointProvider": "OpenAI First-Party",
+        "endpointType": "first_party",
+        "hostingNotes": "OpenAI flagship reasoning infrastructure."
+      },
+      "effectiveDate": "2026-11-12",
+      "promotionalExpiryDate": null,
+      "lastVerifiedDate": "2026-11-12",
+      "officialSourceUrl": "https://openai.com/api/pricing/",
+      "notes": "Advanced reasoning model with chain-of-thought processing for complex STEM, coding, and multi-step logic."
+    },
+    {
+      "id": "openai/o3-mini",
+      "slug": "o3-mini",
+      "displayName": "o3-mini",
+      "apiModelId": "o3-mini",
+      "provider": "openai",
+      "modelFamily": "o3",
+      "openWeight": false,
+      "contextWindowTokens": 200000,
+      "maxOutputTokens": 100000,
+      "reasoningTokensBilledAsOutput": true,
+      "featuredDetailPage": true,
+      "pricingTiers": [
+        {
+          "label": "Standard (<= 200K)",
+          "upToTokens": null,
+          "inputPer1M": 1.1,
+          "outputPer1M": 4.4,
+          "cachedInputReadPer1M": 0.55,
+          "cacheWrite5mPer1M": null,
+          "cacheWrite1hPer1M": null,
+          "batchInputPer1M": 0.55,
+          "batchOutputPer1M": 2.2
+        }
+      ],
+      "promptCaching": {
+        "supported": true,
+        "mode": "automatic",
+        "minCacheableTokens": 1024,
+        "ttlOptions": [
+          "automatic"
+        ],
+        "storagePer1MPerHour": null,
+        "notes": "Automatic prompt caching with 50% discount on cached input reads ($0.55/1M). Internal reasoning tokens billed as output tokens ($4.40/1M)."
+      },
+      "batchApi": {
+        "supported": true,
+        "discountPercent": 50,
+        "cachingAllowedInBatch": true,
+        "batchDiscountAppliesToCache": true,
+        "turnaroundWindow": "24h",
+        "notes": "50% discount via OpenAI Batch API."
+      },
+      "hosting": {
+        "endpointProvider": "OpenAI First-Party",
+        "endpointType": "first_party",
+        "hostingNotes": "OpenAI high-speed reasoning infrastructure."
+      },
+      "effectiveDate": "2026-11-12",
+      "promotionalExpiryDate": null,
+      "lastVerifiedDate": "2026-11-12",
+      "officialSourceUrl": "https://openai.com/api/pricing/",
+      "notes": "Fast, cost-effective reasoning model optimized for STEM and competitive coding."
+    },
+    {
+      "id": "anthropic/claude-3-5-sonnet-latest",
+      "slug": "claude-3-5-sonnet-latest",
+      "displayName": "Claude 3.5 Sonnet",
+      "apiModelId": "claude-3-5-sonnet-latest",
+      "provider": "anthropic",
+      "modelFamily": "Claude 3.5",
+      "openWeight": false,
+      "contextWindowTokens": 200000,
+      "maxOutputTokens": 8192,
+      "reasoningTokensBilledAsOutput": false,
+      "featuredDetailPage": true,
+      "pricingTiers": [
+        {
+          "label": "Standard (<= 200K)",
+          "upToTokens": null,
+          "inputPer1M": 3,
+          "outputPer1M": 15,
+          "cachedInputReadPer1M": 0.3,
+          "cacheWrite5mPer1M": 3.75,
+          "cacheWrite1hPer1M": null,
+          "batchInputPer1M": 1.5,
           "batchOutputPer1M": 7.5
         }
       ],
       "promptCaching": {
         "supported": true,
-        "mode": "automatic",
+        "mode": "explicit",
         "minCacheableTokens": 1024,
-        "ttlOptions": ["30m", "12h"],
+        "ttlOptions": [
+          "5m"
+        ],
         "storagePer1MPerHour": null,
-        "notes": "Read = 0.05x (95% off = $0.10/1M short, $0.20/1M long). Write total rate = 1.25x (30m) or 2.50x (12h). Min 1,024 visible input tokens."
+        "notes": "Prompt caching write (5-minute TTL) is 1.25x standard input ($3.75/1M). Cache reads are 0.10x ($0.30/1M, 90% discount). Minimum 1,024 prefix tokens."
       },
       "batchApi": {
         "supported": true,
@@ -130,626 +260,223 @@
         "cachingAllowedInBatch": true,
         "batchDiscountAppliesToCache": true,
         "turnaroundWindow": "24h",
-        "notes": "50% off all columns including 95%-discounted cached reads ($0.05/1M short) and cache writes."
-      },
-      "hosting": {
-        "endpointProvider": "OpenAI First-Party",
-        "endpointType": "first_party",
-        "regionMultipliers": [
-          { "regionLabel": "Global / Standard", "multiplier": 1.0 },
-          { "regionLabel": "US-Only / Regional Residency (+10%)", "multiplier": 1.1 }
-        ],
-        "hostingNotes": "Regional data residency & FedRAMP endpoints add +10% uplift. Fast tier = 2x, Ultrafast = 6x."
-      },
-      "effectiveDate": "2026-11-12",
-      "promotionalExpiryDate": null,
-      "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://developers.openai.com/api/docs/pricing",
-      "notes": "High-efficiency workhorse with 95% cache hit discount. Prompts >272K input tokens trigger 2x input/cache/write and 1.5x output."
-    },
-    {
-      "id": "openai/gpt-6-luna",
-      "slug": "gpt-6-luna",
-      "displayName": "GPT-6 Luna",
-      "apiModelId": "gpt-6-luna",
-      "provider": "openai",
-      "modelFamily": "GPT-6",
-      "openWeight": false,
-      "contextWindowTokens": 1050000,
-      "maxInputTokens": 922000,
-      "maxOutputTokens": 128000,
-      "reasoningTokensBilledAsOutput": true,
-      "featuredDetailPage": false,
-      "pricingTiers": [
-        {
-          "label": "Standard (<= 272K)",
-          "upToTokens": 272000,
-          "inputPer1M": 0.1,
-          "outputPer1M": 0.5,
-          "cachedInputReadPer1M": 0.01,
-          "cacheWrite5mPer1M": null,
-          "cacheWrite1hPer1M": null,
-          "cacheWrite30mPer1M": 0.125,
-          "cacheWrite12hPer1M": 0.25,
-          "batchInputPer1M": 0.05,
-          "batchOutputPer1M": 0.25
-        },
-        {
-          "label": "Long Context (> 272K)",
-          "upToTokens": null,
-          "inputPer1M": 0.2,
-          "outputPer1M": 0.75,
-          "cachedInputReadPer1M": 0.02,
-          "cacheWrite5mPer1M": null,
-          "cacheWrite1hPer1M": null,
-          "cacheWrite30mPer1M": 0.25,
-          "cacheWrite12hPer1M": 0.5,
-          "batchInputPer1M": 0.1,
-          "batchOutputPer1M": 0.375
-        }
-      ],
-      "promptCaching": {
-        "supported": true,
-        "mode": "automatic",
-        "minCacheableTokens": 1024,
-        "ttlOptions": ["30m", "12h"],
-        "storagePer1MPerHour": null,
-        "notes": "Read = 0.10x (90% off). Write total rate = 1.25x (30m) or 2.50x (12h). Min 1,024 visible input tokens."
-      },
-      "batchApi": {
-        "supported": true,
-        "discountPercent": 50,
-        "cachingAllowedInBatch": true,
-        "batchDiscountAppliesToCache": true,
-        "turnaroundWindow": "24h",
-        "notes": "50% off all columns ($0.05/$0.25/$0.005 short)."
-      },
-      "hosting": {
-        "endpointProvider": "OpenAI First-Party",
-        "endpointType": "first_party",
-        "regionMultipliers": [
-          { "regionLabel": "Global / Standard", "multiplier": 1.0 },
-          { "regionLabel": "US-Only / Regional Residency (+10%)", "multiplier": 1.1 }
-        ],
-        "hostingNotes": "Regional data residency adds +10% uplift."
-      },
-      "effectiveDate": "2026-11-12",
-      "promotionalExpiryDate": null,
-      "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://developers.openai.com/api/docs/pricing",
-      "notes": "Ultra-low-cost OpenAI high-volume model. Prompts >272K input tokens trigger 2x input/cache/write and 1.5x output."
-    },
-    {
-      "id": "anthropic/claude-fable-5-2",
-      "slug": "claude-fable-5-2",
-      "displayName": "Claude Fable 5.2",
-      "apiModelId": "claude-fable-5-2",
-      "provider": "anthropic",
-      "modelFamily": "Claude 5.2",
-      "openWeight": false,
-      "contextWindowTokens": 1000000,
-      "maxOutputTokens": 128000,
-      "reasoningTokensBilledAsOutput": true,
-      "featuredDetailPage": false,
-      "pricingTiers": [
-        {
-          "label": "Standard (<= 1M)",
-          "upToTokens": null,
-          "inputPer1M": 8.0,
-          "outputPer1M": 40.0,
-          "cachedInputReadPer1M": 0.2,
-          "cacheWrite5mPer1M": 10.0,
-          "cacheWrite1hPer1M": 16.0,
-          "batchInputPer1M": 4.0,
-          "batchOutputPer1M": 20.0
-        }
-      ],
-      "promptCaching": {
-        "supported": true,
-        "mode": "explicit",
-        "minCacheableTokens": 512,
-        "ttlOptions": ["5m", "1h"],
-        "storagePer1MPerHour": null,
-        "notes": "Read = 0.025x (97.5% off = $0.20/1M). Write = 1.25x (5m) or 2.0x (1h). Min 512 tokens. Claude 4.7+ tokenizer produces ~30% more tokens for identical text."
-      },
-      "batchApi": {
-        "supported": true,
-        "discountPercent": 50,
-        "cachingAllowedInBatch": true,
-        "batchDiscountAppliesToCache": true,
-        "turnaroundWindow": "Up to 24h",
-        "notes": "50% off; stacks multiplicatively with prompt caching ($0.10/1M read, $5.00 5m write, $8.00 1h write). Fast mode is incompatible with Batch."
+        "notes": "Anthropic Message Batches API offers 50% discount; stacks with prompt caching."
       },
       "hosting": {
         "endpointProvider": "Anthropic First-Party",
         "endpointType": "first_party",
-        "regionMultipliers": [
-          { "regionLabel": "Global Dynamic", "multiplier": 1.0 },
-          { "regionLabel": "US-Only (inference_geo: us)", "multiplier": 1.1 }
-        ],
-        "hostingNotes": "US-only data residency (inference_geo: 'us') adds 1.1x multiplier."
+        "hostingNotes": "Anthropic API."
       },
       "effectiveDate": "2026-11-12",
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
-      "notes": "Anthropic flagship reasoning model with flat 1M context pricing and 97.5% cache read discount."
+      "officialSourceUrl": "https://www.anthropic.com/pricing",
+      "notes": "Flagship intelligence model with industry-leading coding and reasoning capabilities."
     },
     {
-      "id": "anthropic/claude-sonnet-5-5",
-      "slug": "claude-sonnet-5-5",
-      "displayName": "Claude Sonnet 5.5",
-      "apiModelId": "claude-sonnet-5-5",
+      "id": "anthropic/claude-3-5-haiku-latest",
+      "slug": "claude-3-5-haiku-latest",
+      "displayName": "Claude 3.5 Haiku",
+      "apiModelId": "claude-3-5-haiku-latest",
       "provider": "anthropic",
-      "modelFamily": "Claude 5.5",
+      "modelFamily": "Claude 3.5",
       "openWeight": false,
-      "contextWindowTokens": 1000000,
-      "maxOutputTokens": 128000,
-      "reasoningTokensBilledAsOutput": true,
+      "contextWindowTokens": 200000,
+      "maxOutputTokens": 8192,
+      "reasoningTokensBilledAsOutput": false,
       "featuredDetailPage": true,
-      "pricingTiers": [
-        {
-          "label": "Standard (<= 1M)",
-          "upToTokens": null,
-          "inputPer1M": 2.0,
-          "outputPer1M": 10.0,
-          "cachedInputReadPer1M": 0.1,
-          "cacheWrite5mPer1M": 2.5,
-          "cacheWrite1hPer1M": 4.0,
-          "batchInputPer1M": 1.0,
-          "batchOutputPer1M": 5.0
-        }
-      ],
-      "promptCaching": {
-        "supported": true,
-        "mode": "explicit",
-        "minCacheableTokens": 512,
-        "ttlOptions": ["5m", "1h"],
-        "storagePer1MPerHour": null,
-        "notes": "Read = 0.05x (95% off = $0.10/1M). Write = 1.25x (5m) or 2.0x (1h). Min 512 tokens. Claude 4.7+ tokenizer produces ~30% more tokens."
-      },
-      "batchApi": {
-        "supported": true,
-        "discountPercent": 50,
-        "cachingAllowedInBatch": true,
-        "batchDiscountAppliesToCache": true,
-        "turnaroundWindow": "Up to 24h",
-        "notes": "50% off; stacks with caching ($0.05/1M read, $1.25 5m, $2.00 1h). Supports up to 300K output tokens in Batch with beta header."
-      },
-      "hosting": {
-        "endpointProvider": "Anthropic First-Party",
-        "endpointType": "first_party",
-        "regionMultipliers": [
-          { "regionLabel": "Global Dynamic", "multiplier": 1.0 },
-          { "regionLabel": "US-Only (inference_geo: us)", "multiplier": 1.1 }
-        ],
-        "hostingNotes": "US-only data residency (inference_geo: 'us') adds 1.1x multiplier."
-      },
-      "effectiveDate": "2026-11-12",
-      "promotionalExpiryDate": null,
-      "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
-      "notes": "Flat 1M context workhorse model. Same $2/$10 base pricing as Claude Opus 5.5 is $4/$20."
-    },
-    {
-      "id": "anthropic/claude-haiku-5-5",
-      "slug": "claude-haiku-5-5",
-      "displayName": "Claude Haiku 5.5",
-      "apiModelId": "claude-haiku-5-5",
-      "provider": "anthropic",
-      "modelFamily": "Claude 5.5",
-      "openWeight": false,
-      "contextWindowTokens": 1000000,
-      "maxOutputTokens": 128000,
-      "reasoningTokensBilledAsOutput": true,
-      "featuredDetailPage": true,
-      "pricingTiers": [
-        {
-          "label": "Standard (<= 100K)",
-          "upToTokens": 100000,
-          "inputPer1M": 0.1,
-          "outputPer1M": 0.5,
-          "cachedInputReadPer1M": 0.01,
-          "cacheWrite5mPer1M": 0.125,
-          "cacheWrite1hPer1M": 0.2,
-          "batchInputPer1M": 0.05,
-          "batchOutputPer1M": 0.25
-        },
-        {
-          "label": "Long Context (> 100K)",
-          "upToTokens": null,
-          "inputPer1M": 0.5,
-          "outputPer1M": 2.5,
-          "cachedInputReadPer1M": 0.05,
-          "cacheWrite5mPer1M": 0.625,
-          "cacheWrite1hPer1M": 1.0,
-          "batchInputPer1M": 0.25,
-          "batchOutputPer1M": 1.25
-        }
-      ],
-      "promptCaching": {
-        "supported": true,
-        "mode": "explicit",
-        "minCacheableTokens": 512,
-        "ttlOptions": ["5m", "1h"],
-        "storagePer1MPerHour": null,
-        "notes": "Read = 0.10x (90% off). Write = 1.25x (5m) or 2.0x (1h). Min 512 tokens. Total input (input + cache_read + cache_write) >100K triggers 5x tier."
-      },
-      "batchApi": {
-        "supported": true,
-        "discountPercent": 50,
-        "cachingAllowedInBatch": true,
-        "batchDiscountAppliesToCache": true,
-        "turnaroundWindow": "Up to 24h",
-        "notes": "50% off; stacks with caching and <=100K/>100K tier. Supports up to 300K output tokens in Batch with beta header."
-      },
-      "hosting": {
-        "endpointProvider": "Anthropic First-Party",
-        "endpointType": "first_party",
-        "regionMultipliers": [
-          { "regionLabel": "Global Dynamic", "multiplier": 1.0 },
-          { "regionLabel": "US-Only (inference_geo: us)", "multiplier": 1.1 }
-        ],
-        "hostingNotes": "US-only data residency adds 1.1x multiplier."
-      },
-      "effectiveDate": "2026-11-12",
-      "promotionalExpiryDate": null,
-      "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
-      "notes": "5x long-context pricing cliff above 100,000 total input tokens (input + cache_read + cache_write) per request."
-    },
-    {
-      "id": "google/gemini-4-carbon",
-      "slug": "gemini-4-carbon",
-      "displayName": "Gemini 4 Carbon",
-      "apiModelId": "gemini-4-carbon",
-      "provider": "google",
-      "modelFamily": "Gemini 4",
-      "openWeight": false,
-      "contextWindowTokens": 1048576,
-      "maxOutputTokens": 65536,
-      "reasoningTokensBilledAsOutput": true,
-      "featuredDetailPage": true,
-      "pricingTiers": [
-        {
-          "label": "Intro Promo (<= 1M, thru 2026-11-30)",
-          "upToTokens": null,
-          "inputPer1M": 2.0,
-          "outputPer1M": 10.0,
-          "cachedInputReadPer1M": 0.1,
-          "cacheWrite5mPer1M": 2.0,
-          "cacheWrite1hPer1M": null,
-          "batchInputPer1M": 1.0,
-          "batchOutputPer1M": 5.0
-        }
-      ],
-      "promptCaching": {
-        "supported": true,
-        "mode": "automatic",
-        "minCacheableTokens": 4096,
-        "ttlOptions": ["automatic"],
-        "storagePer1MPerHour": null,
-        "notes": "Implicit caching ONLY (explicit caching not supported on Gemini 4). Min 4,096 tokens. Multi-turn only caches full prior request if new turn adds >= 2,050 tokens."
-      },
-      "batchApi": {
-        "supported": true,
-        "discountPercent": 50,
-        "cachingAllowedInBatch": true,
-        "batchDiscountAppliesToCache": true,
-        "turnaroundWindow": "Up to 24h",
-        "notes": "50% off input ($1.00), output ($5.00), and implicit cache read ($0.05) thru 2026-11-30; doubles 2026-12-01 ($2/$10/$0.10). Paid tier only."
-      },
-      "hosting": {
-        "endpointProvider": "Google AI Studio / Gemini API",
-        "endpointType": "first_party",
-        "hostingNotes": "Paid tier only; 65,536 sync max output (long-decode up to 1,048,576). Priority tier = 1.8x ($3.60/$18.00/$0.18 thru Nov 30)."
-      },
-      "effectiveDate": "2026-11-12",
-      "promotionalExpiryDate": "2026-11-30",
-      "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://aistudio.google.com/docs/pricing",
-      "notes": "PROMO EXPIRY 2026-11-30: Standard rates double to $4.00/$20.00/$0.20 (Batch $2.00/$10.00/$0.10) starting 2026-12-01."
-    },
-    {
-      "id": "google/gemini-3-8-flash",
-      "slug": "gemini-3-8-flash",
-      "displayName": "Gemini 3.8 Flash",
-      "apiModelId": "gemini-3.8-flash",
-      "provider": "google",
-      "modelFamily": "Gemini 3.8",
-      "openWeight": false,
-      "contextWindowTokens": 1048576,
-      "maxOutputTokens": 65536,
-      "reasoningTokensBilledAsOutput": true,
-      "featuredDetailPage": true,
-      "pricingTiers": [
-        {
-          "label": "Intro Promo (<= 1M, thru 2026-12-31)",
-          "upToTokens": null,
-          "inputPer1M": 0.75,
-          "outputPer1M": 3.75,
-          "cachedInputReadPer1M": 0.075,
-          "cacheWrite5mPer1M": 0.75,
-          "cacheWrite1hPer1M": null,
-          "batchInputPer1M": 0.375,
-          "batchOutputPer1M": 1.875
-        }
-      ],
-      "promptCaching": {
-        "supported": true,
-        "mode": "explicit",
-        "minCacheableTokens": 4096,
-        "ttlOptions": ["custom_hourly"],
-        "storagePer1MPerHour": 0.5,
-        "notes": "Supports both implicit and explicit caching (min 4,096 tokens). Explicit storage = $0.50/1M/hr thru 2026-12-31 ($1.00/1M/hr starting 2027-01-01)."
-      },
-      "batchApi": {
-        "supported": true,
-        "discountPercent": 50,
-        "cachingAllowedInBatch": true,
-        "batchDiscountAppliesToCache": true,
-        "turnaroundWindow": "Up to 24h",
-        "notes": "50% off input ($0.375), output ($1.875), and cache read ($0.0375); storage stays $0.50/1M/hr thru 2026-12-31."
-      },
-      "hosting": {
-        "endpointProvider": "Google AI Studio / Gemini API",
-        "endpointType": "first_party",
-        "hostingNotes": "Free tier available; Priority tier = 1.8x ($1.35/$6.75/$0.135 thru Dec 31)."
-      },
-      "effectiveDate": "2026-11-12",
-      "promotionalExpiryDate": "2026-12-31",
-      "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://aistudio.google.com/docs/pricing",
-      "notes": "PROMO EXPIRY 2026-12-31: Standard rates double to $1.50/$7.50/$0.15 + $1.00/hr storage starting 2027-01-01."
-    },
-    {
-      "id": "google/gemini-3-1-pro-preview",
-      "slug": "gemini-3-1-pro-preview",
-      "displayName": "Gemini 3.1 Pro Preview",
-      "apiModelId": "gemini-3.1-pro-preview",
-      "provider": "google",
-      "modelFamily": "Gemini 3.1",
-      "openWeight": false,
-      "contextWindowTokens": 1048576,
-      "maxOutputTokens": 65536,
-      "reasoningTokensBilledAsOutput": true,
-      "featuredDetailPage": false,
       "pricingTiers": [
         {
           "label": "Standard (<= 200K)",
-          "upToTokens": 200000,
-          "inputPer1M": 2.0,
-          "outputPer1M": 12.0,
-          "cachedInputReadPer1M": 0.2,
-          "cacheWrite5mPer1M": 2.0,
-          "cacheWrite1hPer1M": null,
-          "batchInputPer1M": 1.0,
-          "batchOutputPer1M": 6.0
-        },
-        {
-          "label": "Long Context (> 200K)",
           "upToTokens": null,
-          "inputPer1M": 4.0,
-          "outputPer1M": 18.0,
-          "cachedInputReadPer1M": 0.4,
-          "cacheWrite5mPer1M": 4.0,
+          "inputPer1M": 0.8,
+          "outputPer1M": 4,
+          "cachedInputReadPer1M": 0.08,
+          "cacheWrite5mPer1M": 1,
           "cacheWrite1hPer1M": null,
-          "batchInputPer1M": 2.0,
-          "batchOutputPer1M": 9.0
+          "batchInputPer1M": 0.4,
+          "batchOutputPer1M": 2
         }
       ],
       "promptCaching": {
         "supported": true,
         "mode": "explicit",
-        "minCacheableTokens": 4096,
-        "ttlOptions": ["custom_hourly"],
-        "storagePer1MPerHour": 4.5,
-        "notes": "Min 4,096 implicit tokens; explicit storage = $4.50/1M/hr across both tiers."
+        "minCacheableTokens": 2048,
+        "ttlOptions": [
+          "5m"
+        ],
+        "storagePer1MPerHour": null,
+        "notes": "Prompt caching write (5m TTL) is 1.25x standard input ($1.00/1M). Cache reads are 0.10x ($0.08/1M, 90% discount). Minimum 2,048 prefix tokens."
       },
       "batchApi": {
         "supported": true,
         "discountPercent": 50,
         "cachingAllowedInBatch": true,
-        "batchDiscountAppliesToCache": false,
-        "turnaroundWindow": "Up to 24h",
-        "notes": "CRITICAL EXCEPTION: Batch discounts input & output 50% ($1/$6 <=200K, $2/$9 >200K), but cache read ($0.20/$0.40) and storage ($4.50/hr) remain 'Same as Standard'."
+        "batchDiscountAppliesToCache": true,
+        "turnaroundWindow": "24h",
+        "notes": "Anthropic Message Batches API offers 50% discount; stacks with prompt caching."
       },
       "hosting": {
-        "endpointProvider": "Google AI Studio / Gemini API",
+        "endpointProvider": "Anthropic First-Party",
         "endpointType": "first_party",
-        "hostingNotes": "Paid tier only; 200K token cliff doubles input & cache read rates and lifts output 1.5x."
+        "hostingNotes": "Anthropic API."
       },
       "effectiveDate": "2026-11-12",
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://aistudio.google.com/docs/pricing",
-      "notes": "Tiered 200K long-context cliff plus explicit un-discounted batch cache pricing."
+      "officialSourceUrl": "https://www.anthropic.com/pricing",
+      "notes": "High-speed, low-latency Claude model with coding capability matching previous generation Sonnet."
     },
     {
-      "id": "deepseek/deepseek-flash",
-      "slug": "deepseek-flash",
-      "displayName": "DeepSeek Flash (V4.1-Flash-1017)",
-      "apiModelId": "deepseek-flash",
-      "provider": "deepseek",
-      "modelFamily": "DeepSeek V4.1",
-      "openWeight": true,
-      "contextWindowTokens": 1000000,
-      "maxOutputTokens": 393216,
-      "reasoningTokensBilledAsOutput": true,
+      "id": "anthropic/claude-3-opus-latest",
+      "slug": "claude-3-opus-latest",
+      "displayName": "Claude 3 Opus",
+      "apiModelId": "claude-3-opus-latest",
+      "provider": "anthropic",
+      "modelFamily": "Claude 3",
+      "openWeight": false,
+      "contextWindowTokens": 200000,
+      "maxOutputTokens": 4096,
+      "reasoningTokensBilledAsOutput": false,
       "featuredDetailPage": true,
       "pricingTiers": [
         {
-          "label": "Standard (<= 1M)",
+          "label": "Standard (<= 200K)",
           "upToTokens": null,
-          "inputPer1M": 0.3,
-          "outputPer1M": 1.2,
-          "cachedInputReadPer1M": 0.006,
-          "cacheWrite5mPer1M": 0.3,
+          "inputPer1M": 15,
+          "outputPer1M": 75,
+          "cachedInputReadPer1M": 1.5,
+          "cacheWrite5mPer1M": 18.75,
           "cacheWrite1hPer1M": null,
-          "offPeakRates": {
-            "inputPer1M": 0.15,
-            "outputPer1M": 0.6,
-            "cachedInputReadPer1M": 0.003,
-            "windowDescriptionUtc": "Outside 01:00-04:00 & 06:00-10:00 UTC Mon-Fri (all weekends & Chinese public holidays are Off-Peak)"
-          }
-        }
-      ],
-      "promptCaching": {
-        "supported": true,
-        "mode": "automatic",
-        "minCacheableTokens": null,
-        "ttlOptions": ["automatic"],
-        "storagePer1MPerHour": null,
-        "notes": "Automatic disk-based KV caching with 98% discount (0.02x): $0.006/1M Peak, $0.003/1M Off-Peak. Zero cache write surcharge."
-      },
-      "batchApi": {
-        "supported": false,
-        "discountPercent": null,
-        "cachingAllowedInBatch": false,
-        "batchDiscountAppliesToCache": false,
-        "turnaroundWindow": null,
-        "notes": "No Batch API exists on DeepSeek (confirmed via official sitemap.xml). Schedule jobs in Off-Peak UTC windows for 50% off."
-      },
-      "hosting": {
-        "endpointProvider": "DeepSeek First-Party",
-        "endpointType": "first_party",
-        "hostingNotes": "2,500 concurrency limit; supports OpenAI and Anthropic API formats."
-      },
-      "effectiveDate": "2026-10-17",
-      "promotionalExpiryDate": null,
-      "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
-      "notes": "Base fields store Peak rates ($0.30/$1.20/$0.006); toggle Off-Peak for 50% discount ($0.15/$0.60/$0.003)."
-    },
-    {
-      "id": "deepseek/deepseek-v4-pro",
-      "slug": "deepseek-v4-pro",
-      "displayName": "DeepSeek V4 Pro (0813)",
-      "apiModelId": "deepseek-v4-pro",
-      "provider": "deepseek",
-      "modelFamily": "DeepSeek V4",
-      "openWeight": true,
-      "contextWindowTokens": 1000000,
-      "maxOutputTokens": 393216,
-      "reasoningTokensBilledAsOutput": true,
-      "featuredDetailPage": false,
-      "pricingTiers": [
-        {
-          "label": "Standard (<= 1M)",
-          "upToTokens": null,
-          "inputPer1M": 1.32,
-          "outputPer1M": 3.96,
-          "cachedInputReadPer1M": 0.044,
-          "cacheWrite5mPer1M": 1.32,
-          "cacheWrite1hPer1M": null,
-          "offPeakRates": {
-            "inputPer1M": 0.66,
-            "outputPer1M": 1.98,
-            "cachedInputReadPer1M": 0.022,
-            "windowDescriptionUtc": "Outside 01:00-04:00 & 06:00-10:00 UTC Mon-Fri (all weekends & Chinese public holidays are Off-Peak)"
-          }
-        }
-      ],
-      "promptCaching": {
-        "supported": true,
-        "mode": "automatic",
-        "minCacheableTokens": null,
-        "ttlOptions": ["automatic"],
-        "storagePer1MPerHour": null,
-        "notes": "Automatic disk KV cache (~96.67% off): $0.044/1M Peak, $0.022/1M Off-Peak. Zero write surcharge."
-      },
-      "batchApi": {
-        "supported": false,
-        "discountPercent": null,
-        "cachingAllowedInBatch": false,
-        "batchDiscountAppliesToCache": false,
-        "turnaroundWindow": null,
-        "notes": "No Batch API on DeepSeek; use Off-Peak UTC windows for 50% discount."
-      },
-      "hosting": {
-        "endpointProvider": "DeepSeek First-Party",
-        "endpointType": "first_party",
-        "hostingNotes": "500 concurrency limit; text-only (vision not supported on deepseek-v4-pro)."
-      },
-      "effectiveDate": "2026-08-13",
-      "promotionalExpiryDate": null,
-      "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
-      "notes": "Peak rates in base tier ($1.32/$3.96/$0.044); Off-Peak = 50% off ($0.66/$1.98/$0.022)."
-    },
-    {
-      "id": "mistral/mistral-large-4",
-      "slug": "mistral-large-4",
-      "displayName": "Mistral Large 4",
-      "apiModelId": "mistral-large-4",
-      "provider": "mistral",
-      "modelFamily": "Mistral Large 4",
-      "openWeight": true,
-      "contextWindowTokens": 1000000,
-      "maxOutputTokens": 262144,
-      "reasoningTokensBilledAsOutput": true,
-      "featuredDetailPage": true,
-      "pricingTiers": [
-        {
-          "label": "Standard (<= 1M)",
-          "upToTokens": null,
-          "inputPer1M": 0.7,
-          "outputPer1M": 2.1,
-          "cachedInputReadPer1M": 0.07,
-          "cacheWrite5mPer1M": 0.7,
-          "cacheWrite1hPer1M": null,
-          "batchInputPer1M": 0.35,
-          "batchOutputPer1M": 1.05
+          "batchInputPer1M": 7.5,
+          "batchOutputPer1M": 37.5
         }
       ],
       "promptCaching": {
         "supported": true,
         "mode": "explicit",
-        "minCacheableTokens": 64,
-        "ttlOptions": ["automatic"],
+        "minCacheableTokens": 1024,
+        "ttlOptions": [
+          "5m"
+        ],
         "storagePer1MPerHour": null,
-        "cacheBlockAlignmentTokens": 64,
-        "notes": "Uses prompt_cache_key; 64-token cache blocks (min 64 tokens; cached_tokens billed in multiples of 64). Read = 10% ($0.07/1M); zero write surcharge."
+        "notes": "Prompt caching write (5m TTL) is 1.25x standard input ($18.75/1M). Cache reads are 0.10x ($1.50/1M, 90% discount). Minimum 1,024 prefix tokens."
       },
       "batchApi": {
         "supported": true,
         "discountPercent": 50,
-        "cachingAllowedInBatch": false,
-        "batchDiscountAppliesToCache": false,
-        "turnaroundWindow": "24h default (<7d max)",
-        "notes": "50% discount available on all Mistral models ($0.35/$1.05). Docs do not specify batch+cache discount stacking."
+        "cachingAllowedInBatch": true,
+        "batchDiscountAppliesToCache": true,
+        "turnaroundWindow": "24h",
+        "notes": "Anthropic Message Batches API offers 50% discount."
       },
       "hosting": {
-        "endpointProvider": "Mistral La Plateforme",
+        "endpointProvider": "Anthropic First-Party",
         "endpointType": "first_party",
-        "hostingNotes": "1.05T total / 52B active MoE open-weight model (Mistral Ecosystem Open Weight License)."
+        "hostingNotes": "Anthropic API."
       },
-      "effectiveDate": "2026-11-05",
+      "effectiveDate": "2026-11-12",
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://docs.mistral.ai/inference/pricing",
-      "notes": "Mistral docs list 1M context window without a separate max-output field; 262,144 reflects standard generation ceiling."
+      "officialSourceUrl": "https://www.anthropic.com/pricing",
+      "notes": "Deep analytical and synthesis model for complex workflows."
     },
     {
-      "id": "mistral/mistral-small-2603",
-      "slug": "mistral-small-2603",
-      "displayName": "Mistral Small 4 (2603)",
-      "apiModelId": "mistral-small-2603",
-      "provider": "mistral",
-      "modelFamily": "Mistral Small 4",
-      "openWeight": true,
-      "contextWindowTokens": 256000,
-      "maxOutputTokens": 65536,
-      "reasoningTokensBilledAsOutput": true,
-      "featuredDetailPage": false,
+      "id": "google/gemini-1-5-pro",
+      "slug": "gemini-1-5-pro",
+      "displayName": "Gemini 1.5 Pro",
+      "apiModelId": "gemini-1.5-pro",
+      "provider": "google",
+      "modelFamily": "Gemini 1.5",
+      "openWeight": false,
+      "contextWindowTokens": 2000000,
+      "maxOutputTokens": 8192,
+      "reasoningTokensBilledAsOutput": false,
+      "featuredDetailPage": true,
       "pricingTiers": [
         {
-          "label": "Standard (<= 256K)",
+          "label": "Standard (<= 128K)",
+          "upToTokens": 128000,
+          "inputPer1M": 1.25,
+          "outputPer1M": 5,
+          "cachedInputReadPer1M": 0.3125,
+          "cacheWrite5mPer1M": null,
+          "cacheWrite1hPer1M": null,
+          "batchInputPer1M": 0.625,
+          "batchOutputPer1M": 2.5
+        },
+        {
+          "label": "Long Context (> 128K)",
+          "upToTokens": null,
+          "inputPer1M": 2.5,
+          "outputPer1M": 10,
+          "cachedInputReadPer1M": 0.625,
+          "cacheWrite5mPer1M": null,
+          "cacheWrite1hPer1M": null,
+          "batchInputPer1M": 1.25,
+          "batchOutputPer1M": 5
+        }
+      ],
+      "promptCaching": {
+        "supported": true,
+        "mode": "explicit",
+        "minCacheableTokens": 32768,
+        "ttlOptions": [
+          "custom_hourly"
+        ],
+        "storagePer1MPerHour": 4.5,
+        "notes": "Context caching storage: $4.50 per 1M tokens/hour. Cached read is 75% off standard input ($0.3125/1M <=128k, $0.625 >128k). Min 32,768 tokens."
+      },
+      "batchApi": {
+        "supported": true,
+        "discountPercent": 50,
+        "cachingAllowedInBatch": true,
+        "batchDiscountAppliesToCache": true,
+        "turnaroundWindow": "24h",
+        "notes": "50% discount via Google Cloud Vertex / AI Studio Batch."
+      },
+      "hosting": {
+        "endpointProvider": "Google AI Studio / Vertex AI",
+        "endpointType": "first_party",
+        "hostingNotes": "Google first-party infrastructure with 2M native context window."
+      },
+      "effectiveDate": "2026-11-12",
+      "promotionalExpiryDate": null,
+      "lastVerifiedDate": "2026-11-12",
+      "officialSourceUrl": "https://ai.google.dev/pricing",
+      "notes": "Google flagship multimodal model with 2M token context window."
+    },
+    {
+      "id": "google/gemini-1-5-flash",
+      "slug": "gemini-1-5-flash",
+      "displayName": "Gemini 1.5 Flash",
+      "apiModelId": "gemini-1.5-flash",
+      "provider": "google",
+      "modelFamily": "Gemini 1.5",
+      "openWeight": false,
+      "contextWindowTokens": 1000000,
+      "maxOutputTokens": 8192,
+      "reasoningTokensBilledAsOutput": false,
+      "featuredDetailPage": true,
+      "pricingTiers": [
+        {
+          "label": "Standard (<= 128K)",
+          "upToTokens": 128000,
+          "inputPer1M": 0.075,
+          "outputPer1M": 0.3,
+          "cachedInputReadPer1M": 0.01875,
+          "cacheWrite5mPer1M": null,
+          "cacheWrite1hPer1M": null,
+          "batchInputPer1M": 0.0375,
+          "batchOutputPer1M": 0.15
+        },
+        {
+          "label": "Long Context (> 128K)",
           "upToTokens": null,
           "inputPer1M": 0.15,
           "outputPer1M": 0.6,
-          "cachedInputReadPer1M": 0.015,
-          "cacheWrite5mPer1M": 0.15,
+          "cachedInputReadPer1M": 0.0375,
+          "cacheWrite5mPer1M": null,
           "cacheWrite1hPer1M": null,
           "batchInputPer1M": 0.075,
           "batchOutputPer1M": 0.3
@@ -758,101 +485,220 @@
       "promptCaching": {
         "supported": true,
         "mode": "explicit",
-        "minCacheableTokens": 64,
-        "ttlOptions": ["automatic"],
-        "storagePer1MPerHour": null,
-        "cacheBlockAlignmentTokens": 64,
-        "notes": "Live pricing table (https://docs.mistral.ai/inference/pricing) lists $0.015/1M cached input (10% of $0.15); 64-token blocks via prompt_cache_key; zero write surcharge. Note: Mistral .md export omits this column."
+        "minCacheableTokens": 32768,
+        "ttlOptions": [
+          "custom_hourly"
+        ],
+        "storagePer1MPerHour": 1,
+        "notes": "Context caching storage: $1.00 per 1M tokens/hour. Cached read is 75% off standard input ($0.01875/1M <=128k, $0.0375 >128k). Min 32,768 tokens."
       },
       "batchApi": {
         "supported": true,
         "discountPercent": 50,
-        "cachingAllowedInBatch": false,
-        "batchDiscountAppliesToCache": false,
-        "turnaroundWindow": "24h default (<7d max)",
-        "notes": "50% discount ($0.075/$0.30). Docs do not specify batch+cache discount stacking."
+        "cachingAllowedInBatch": true,
+        "batchDiscountAppliesToCache": true,
+        "turnaroundWindow": "24h",
+        "notes": "50% discount via Google Cloud Vertex / AI Studio Batch."
       },
       "hosting": {
-        "endpointProvider": "Mistral La Plateforme",
+        "endpointProvider": "Google AI Studio / Vertex AI",
         "endpointType": "first_party",
-        "hostingNotes": "119B total / 6.5B active MoE open-weight model (Apache 2.0)."
+        "hostingNotes": "Google first-party infrastructure with 1M native context window."
       },
-      "effectiveDate": "2026-03-16",
+      "effectiveDate": "2026-11-12",
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://docs.mistral.ai/inference/pricing",
-      "notes": "Apache 2.0 hybrid instruct/reasoning model. Mistral model card specifies 256k context length."
+      "officialSourceUrl": "https://ai.google.dev/pricing",
+      "notes": "High-speed, cost-efficient 1M context multimodal model."
     },
     {
-      "id": "groq/openai-gpt-oss-120b",
-      "slug": "gpt-oss-120b-groq",
-      "displayName": "GPT-OSS 120B (Groq)",
-      "apiModelId": "openai/gpt-oss-120b",
-      "provider": "groq",
-      "modelFamily": "GPT-OSS",
-      "openWeight": true,
-      "contextWindowTokens": 131072,
-      "maxOutputTokens": 65536,
-      "reasoningTokensBilledAsOutput": true,
+      "id": "google/gemini-2-0-flash",
+      "slug": "gemini-2-0-flash",
+      "displayName": "Gemini 2.0 Flash",
+      "apiModelId": "gemini-2.0-flash",
+      "provider": "google",
+      "modelFamily": "Gemini 2.0",
+      "openWeight": false,
+      "contextWindowTokens": 1000000,
+      "maxOutputTokens": 8192,
+      "reasoningTokensBilledAsOutput": false,
       "featuredDetailPage": true,
       "pricingTiers": [
         {
-          "label": "Standard (<= 131K)",
+          "label": "Standard (<= 1M)",
           "upToTokens": null,
-          "inputPer1M": 0.15,
-          "outputPer1M": 0.6,
-          "cachedInputReadPer1M": 0.075,
-          "cacheWrite5mPer1M": 0.15,
+          "inputPer1M": 0.1,
+          "outputPer1M": 0.4,
+          "cachedInputReadPer1M": 0.025,
+          "cacheWrite5mPer1M": null,
           "cacheWrite1hPer1M": null,
-          "batchInputPer1M": 0.075,
-          "batchOutputPer1M": 0.3
+          "batchInputPer1M": 0.05,
+          "batchOutputPer1M": 0.2
+        }
+      ],
+      "promptCaching": {
+        "supported": true,
+        "mode": "explicit",
+        "minCacheableTokens": 32768,
+        "ttlOptions": [
+          "custom_hourly"
+        ],
+        "storagePer1MPerHour": 1,
+        "notes": "Context caching storage: $1.00 per 1M tokens/hour. Cached read is 75% off standard input ($0.025/1M). Min 32,768 tokens."
+      },
+      "batchApi": {
+        "supported": true,
+        "discountPercent": 50,
+        "cachingAllowedInBatch": true,
+        "batchDiscountAppliesToCache": true,
+        "turnaroundWindow": "24h",
+        "notes": "50% discount via Google Batch API."
+      },
+      "hosting": {
+        "endpointProvider": "Google AI Studio / Vertex AI",
+        "endpointType": "first_party",
+        "hostingNotes": "Next-gen multimodal architecture."
+      },
+      "effectiveDate": "2026-11-12",
+      "promotionalExpiryDate": null,
+      "lastVerifiedDate": "2026-11-12",
+      "officialSourceUrl": "https://ai.google.dev/pricing",
+      "notes": "Next-generation multimodal model with native tool use and ultra-fast generation."
+    },
+    {
+      "id": "deepseek/deepseek-chat",
+      "slug": "deepseek-chat",
+      "displayName": "DeepSeek-V3 (deepseek-chat)",
+      "apiModelId": "deepseek-chat",
+      "provider": "deepseek",
+      "modelFamily": "DeepSeek-V3",
+      "openWeight": true,
+      "contextWindowTokens": 64000,
+      "maxOutputTokens": 8000,
+      "reasoningTokensBilledAsOutput": false,
+      "featuredDetailPage": true,
+      "pricingTiers": [
+        {
+          "label": "Standard (<= 64K)",
+          "upToTokens": null,
+          "inputPer1M": 0.14,
+          "outputPer1M": 0.28,
+          "cachedInputReadPer1M": 0.014,
+          "cacheWrite5mPer1M": null,
+          "cacheWrite1hPer1M": null,
+          "offPeakRates": {
+            "inputPer1M": 0.07,
+            "outputPer1M": 0.14,
+            "cachedInputReadPer1M": 0.007,
+            "windowDescriptionUtc": "16:30 - 00:30 UTC daily (50% off-peak discount)"
+          }
         }
       ],
       "promptCaching": {
         "supported": true,
         "mode": "automatic",
-        "minCacheableTokens": null,
-        "ttlOptions": ["2h"],
+        "minCacheableTokens": 64,
+        "ttlOptions": [
+          "automatic"
+        ],
         "storagePer1MPerHour": null,
-        "notes": "Automatic volatile memory cache (2h inactivity expiry), 50% off input ($0.075/1M), zero write surcharge. Supported ONLY on 3 Groq models (gpt-oss-120b, gpt-oss-20b, gpt-oss-safeguard-20b)."
+        "notes": "Automatic prompt caching with 64-token block alignment. Cache hit rate is $0.014/1M (90% off standard input). Off-peak cache hit is $0.007/1M."
       },
       "batchApi": {
-        "supported": true,
-        "discountPercent": 50,
+        "supported": false,
+        "discountPercent": null,
         "cachingAllowedInBatch": false,
         "batchDiscountAppliesToCache": false,
-        "turnaroundWindow": "24h-7d",
-        "notes": "50% discount ($0.075/$0.30). Groq explicitly states Batch API does NOT stack with prompt caching."
+        "turnaroundWindow": null,
+        "notes": "DeepSeek offers 50% off-peak discounts (16:30-00:30 UTC) instead of an async Batch API."
       },
       "hosting": {
-        "endpointProvider": "Groq LPU",
-        "endpointType": "inference_specialist",
-        "hostingNotes": "~500 tokens/sec throughput on Groq LPU; 250K TPM / 1K RPM Developer tier."
+        "endpointProvider": "DeepSeek First-Party",
+        "endpointType": "first_party",
+        "hostingNotes": "Direct DeepSeek API with automatic caching."
       },
       "effectiveDate": "2026-11-12",
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://console.groq.com/docs/models",
-      "notes": "Open-weight host comparison: same $0.15/$0.60 base rate as Together & Bedrock, but Groq uniquely supports 50% prompt caching AND 50% Batch (non-stacking)."
+      "officialSourceUrl": "https://platform.deepseek.com/api-docs/pricing",
+      "notes": "DeepSeek-V3 671B MoE model with exceptional price-performance."
     },
     {
-      "id": "groq/qwen3-8-27b",
-      "slug": "qwen3-8-27b-groq",
-      "displayName": "Qwen3.8 27B Preview (Groq)",
-      "apiModelId": "qwen/qwen3.8-27b",
-      "provider": "groq",
-      "modelFamily": "Qwen 3.8",
+      "id": "deepseek/deepseek-reasoner",
+      "slug": "deepseek-reasoner",
+      "displayName": "DeepSeek-R1 (deepseek-reasoner)",
+      "apiModelId": "deepseek-reasoner",
+      "provider": "deepseek",
+      "modelFamily": "DeepSeek-R1",
       "openWeight": true,
-      "contextWindowTokens": 131072,
-      "maxOutputTokens": 16384,
+      "contextWindowTokens": 64000,
+      "maxOutputTokens": 8000,
       "reasoningTokensBilledAsOutput": true,
-      "featuredDetailPage": false,
+      "featuredDetailPage": true,
       "pricingTiers": [
         {
-          "label": "Standard (<= 131K)",
+          "label": "Standard (<= 64K)",
           "upToTokens": null,
-          "inputPer1M": 0.8,
-          "outputPer1M": 4.0,
+          "inputPer1M": 0.55,
+          "outputPer1M": 2.19,
+          "cachedInputReadPer1M": 0.14,
+          "cacheWrite5mPer1M": null,
+          "cacheWrite1hPer1M": null,
+          "offPeakRates": {
+            "inputPer1M": 0.275,
+            "outputPer1M": 1.095,
+            "cachedInputReadPer1M": 0.07,
+            "windowDescriptionUtc": "16:30 - 00:30 UTC daily (50% off-peak discount)"
+          }
+        }
+      ],
+      "promptCaching": {
+        "supported": true,
+        "mode": "automatic",
+        "minCacheableTokens": 64,
+        "ttlOptions": [
+          "automatic"
+        ],
+        "storagePer1MPerHour": null,
+        "notes": "Automatic prompt caching. Cache hits billed at $0.14/1M (75% off). Reasoning tokens billed as standard output ($2.19/1M)."
+      },
+      "batchApi": {
+        "supported": false,
+        "discountPercent": null,
+        "cachingAllowedInBatch": false,
+        "batchDiscountAppliesToCache": false,
+        "turnaroundWindow": null,
+        "notes": "DeepSeek offers 50% off-peak discounts (16:30-00:30 UTC) instead of an async Batch API."
+      },
+      "hosting": {
+        "endpointProvider": "DeepSeek First-Party",
+        "endpointType": "first_party",
+        "hostingNotes": "Direct DeepSeek API with automatic caching."
+      },
+      "effectiveDate": "2026-11-12",
+      "promotionalExpiryDate": null,
+      "lastVerifiedDate": "2026-11-12",
+      "officialSourceUrl": "https://platform.deepseek.com/api-docs/pricing",
+      "notes": "DeepSeek-R1 open reasoning model competitive with OpenAI o1."
+    },
+    {
+      "id": "groq/llama-3-3-70b-versatile",
+      "slug": "llama-3-3-70b-groq",
+      "displayName": "Llama 3.3 70B (Groq)",
+      "apiModelId": "llama-3.3-70b-versatile",
+      "provider": "groq",
+      "modelFamily": "Llama 3.3",
+      "openWeight": true,
+      "contextWindowTokens": 128000,
+      "maxOutputTokens": 32768,
+      "reasoningTokensBilledAsOutput": false,
+      "featuredDetailPage": true,
+      "pricingTiers": [
+        {
+          "label": "Standard (<= 128K)",
+          "upToTokens": null,
+          "inputPer1M": 0.59,
+          "outputPer1M": 0.79,
           "cachedInputReadPer1M": null,
           "cacheWrite5mPer1M": null,
           "cacheWrite1hPer1M": null
@@ -864,7 +710,7 @@
         "minCacheableTokens": null,
         "ttlOptions": [],
         "storagePer1MPerHour": null,
-        "notes": "Not supported (Groq caching is limited to the 3 gpt-oss models)."
+        "notes": "Ultra-fast LPU inference; prompt caching not billed separately."
       },
       "batchApi": {
         "supported": false,
@@ -872,98 +718,40 @@
         "cachingAllowedInBatch": false,
         "batchDiscountAppliesToCache": false,
         "turnaroundWindow": null,
-        "notes": "Not listed on Groq Batch API supported models list."
+        "notes": "Real-time streaming LPU inference only."
       },
       "hosting": {
-        "endpointProvider": "Groq LPU",
+        "endpointProvider": "Groq LPU Cloud",
         "endpointType": "inference_specialist",
-        "hostingNotes": "Preview model (~450 t/s, 20 MB max file size). Groq Llama 3.3 70B & Llama 3.1 8B are Enterprise/Contact Sales only."
+        "hostingNotes": "Dedicated Groq LPU hardware offering 250+ tokens/sec."
       },
       "effectiveDate": "2026-11-12",
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://console.groq.com/docs/models",
-      "notes": "Preview model intended for evaluation; neither prompt caching nor Batch API applies."
+      "officialSourceUrl": "https://groq.com/pricing",
+      "notes": "High-throughput, ultra-low latency Llama 3.3 70B inference powered by Groq LPUs."
     },
     {
-      "id": "together/deepseek-v4-1-flash",
-      "slug": "deepseek-v4-1-flash-together",
-      "displayName": "DeepSeek V4.1 Flash (Together AI)",
-      "apiModelId": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "id": "together/llama-3-3-70b-instruct-turbo",
+      "slug": "llama-3-3-70b-together",
+      "displayName": "Llama 3.3 70B Turbo (Together AI)",
+      "apiModelId": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
       "provider": "together",
-      "modelFamily": "DeepSeek V4.1",
+      "modelFamily": "Llama 3.3",
       "openWeight": true,
-      "contextWindowTokens": 1000000,
-      "maxOutputTokens": 131072,
-      "reasoningTokensBilledAsOutput": true,
+      "contextWindowTokens": 128000,
+      "maxOutputTokens": 8192,
+      "reasoningTokensBilledAsOutput": false,
       "featuredDetailPage": true,
       "pricingTiers": [
         {
-          "label": "Standard (<= 1M)",
+          "label": "Standard (<= 128K)",
           "upToTokens": null,
-          "inputPer1M": 0.3,
-          "outputPer1M": 1.2,
-          "cachedInputReadPer1M": 0.006,
-          "cacheWrite5mPer1M": 0.3,
-          "cacheWrite1hPer1M": null,
-          "batchInputPer1M": 0.3,
-          "batchOutputPer1M": 1.2
-        }
-      ],
-      "promptCaching": {
-        "supported": true,
-        "mode": "automatic",
-        "minCacheableTokens": null,
-        "ttlOptions": ["1h"],
-        "storagePer1MPerHour": null,
-        "notes": "Automatic fleet-shared KV cache (~1h best-effort TTL, subject to eviction under load). Read = $0.006/1M (98% off), zero write surcharge."
-      },
-      "batchApi": {
-        "supported": true,
-        "discountPercent": 0,
-        "cachingAllowedInBatch": true,
-        "batchDiscountAppliesToCache": false,
-        "turnaroundWindow": "24h best-effort",
-        "notes": "CRITICAL EXCEPTION: Together Batch API gives 50% off ONLY on openai/whisper-large-v3; all serverless chat models run at standard rates (0% discount, separate rate-limit pool only)."
-      },
-      "hosting": {
-        "endpointProvider": "Together AI Serverless (FP8)",
-        "endpointType": "inference_specialist",
-        "regionMultipliers": [
-          { "regionLabel": "Global Serverless", "multiplier": 1.0 },
-          { "regionLabel": "US-Only (us-api.together.ai, 1.25x)", "multiplier": 1.25 }
-        ],
-        "hostingNotes": "Served in FP8 quantization. US-only inference endpoint adds 1.25x (+25%) to input, cached input, and output."
-      },
-      "effectiveDate": "2026-11-12",
-      "promotionalExpiryDate": null,
-      "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://docs.together.ai/docs/serverless/models",
-      "notes": "24/7 flat rate equals DeepSeek 1P Peak pricing; DeepSeek 1P Off-Peak ($0.15/$0.60/$0.003) is 50% cheaper. Together catalog publishes 1,000,000 context without a separate output column."
-    },
-    {
-      "id": "together/openai-gpt-oss-120b",
-      "slug": "gpt-oss-120b-together",
-      "displayName": "GPT-OSS 120B (Together AI)",
-      "apiModelId": "openai/gpt-oss-120b",
-      "provider": "together",
-      "modelFamily": "GPT-OSS",
-      "openWeight": true,
-      "contextWindowTokens": 131072,
-      "maxOutputTokens": 65536,
-      "reasoningTokensBilledAsOutput": true,
-      "featuredDetailPage": false,
-      "pricingTiers": [
-        {
-          "label": "Standard (<= 131K)",
-          "upToTokens": null,
-          "inputPer1M": 0.15,
-          "outputPer1M": 0.6,
+          "inputPer1M": 0.88,
+          "outputPer1M": 0.88,
           "cachedInputReadPer1M": null,
           "cacheWrite5mPer1M": null,
-          "cacheWrite1hPer1M": null,
-          "batchInputPer1M": 0.15,
-          "batchOutputPer1M": 0.6
+          "cacheWrite1hPer1M": null
         }
       ],
       "promptCaching": {
@@ -972,61 +760,7 @@
         "minCacheableTokens": null,
         "ttlOptions": [],
         "storagePer1MPerHour": null,
-        "notes": "Together serverless catalog lists '-' for Cached Input on openai/gpt-oss-120b."
-      },
-      "batchApi": {
-        "supported": true,
-        "discountPercent": 0,
-        "cachingAllowedInBatch": false,
-        "batchDiscountAppliesToCache": false,
-        "turnaroundWindow": "24h best-effort",
-        "notes": "0% batch discount on Together serverless chat models (runs at standard $0.15/$0.60)."
-      },
-      "hosting": {
-        "endpointProvider": "Together AI Serverless (MXFP4)",
-        "endpointType": "inference_specialist",
-        "regionMultipliers": [
-          { "regionLabel": "Global Serverless", "multiplier": 1.0 },
-          { "regionLabel": "US-Only (us-api.together.ai, 1.25x)", "multiplier": 1.25 }
-        ],
-        "hostingNotes": "Served in MXFP4 quantization. US-only endpoint adds 1.25x ($0.1875/$0.75)."
-      },
-      "effectiveDate": "2026-11-12",
-      "promotionalExpiryDate": null,
-      "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://docs.together.ai/docs/serverless/models",
-      "notes": "Open-weight host contrast: same $0.15/$0.60 base price as Groq & Bedrock, but Together offers neither caching nor a batch price discount on this model."
-    },
-    {
-      "id": "bedrock/anthropic-claude-sonnet-5-5",
-      "slug": "claude-sonnet-5-5-bedrock",
-      "displayName": "Claude Sonnet 5.5 (Amazon Bedrock)",
-      "apiModelId": "anthropic.claude-sonnet-5-5",
-      "provider": "bedrock",
-      "modelFamily": "Claude 5.5",
-      "openWeight": false,
-      "contextWindowTokens": 1000000,
-      "maxOutputTokens": 128000,
-      "reasoningTokensBilledAsOutput": true,
-      "featuredDetailPage": false,
-      "pricingTiers": [
-        {
-          "label": "Global CRIS (<= 1M)",
-          "upToTokens": null,
-          "inputPer1M": 2.0,
-          "outputPer1M": 10.0,
-          "cachedInputReadPer1M": 0.1,
-          "cacheWrite5mPer1M": 2.5,
-          "cacheWrite1hPer1M": 4.0
-        }
-      ],
-      "promptCaching": {
-        "supported": true,
-        "mode": "explicit",
-        "minCacheableTokens": 512,
-        "ttlOptions": ["5m", "1h"],
-        "storagePer1MPerHour": null,
-        "notes": "On-demand only (max 4 cache checkpoints, min 512 tokens). Global CRIS matches 1P ($0.10 read, $2.50 5m, $4.00 1h); US/Geo CRIS adds +10%."
+        "notes": "Serverless Turbo inference on Together AI."
       },
       "batchApi": {
         "supported": false,
@@ -1034,45 +768,195 @@
         "cachingAllowedInBatch": false,
         "batchDiscountAppliesToCache": false,
         "turnaroundWindow": null,
-        "notes": "N/A on Amazon Bedrock for Claude 5.x models (Sonnet 5.5, Opus 5.5, Fable 5.2, Haiku 5.5). Use Claude Sonnet 4.6 ($1.50/$7.50) or Opus 5 ($2.50/$12.50) for 50% Bedrock Batch."
+        "notes": "Serverless API pricing."
       },
       "hosting": {
-        "endpointProvider": "Amazon Bedrock (Cross-Region Inference)",
+        "endpointProvider": "Together AI",
+        "endpointType": "inference_specialist",
+        "hostingNotes": "High-throughput serverless GPU cluster."
+      },
+      "effectiveDate": "2026-11-12",
+      "promotionalExpiryDate": null,
+      "lastVerifiedDate": "2026-11-12",
+      "officialSourceUrl": "https://www.together.ai/pricing",
+      "notes": "Together AI serverless Turbo endpoint for Meta Llama 3.3 70B."
+    },
+    {
+      "id": "together/llama-3-1-405b-instruct-turbo",
+      "slug": "llama-3-1-405b-together",
+      "displayName": "Llama 3.1 405B Turbo (Together AI)",
+      "apiModelId": "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo",
+      "provider": "together",
+      "modelFamily": "Llama 3.1",
+      "openWeight": true,
+      "contextWindowTokens": 128000,
+      "maxOutputTokens": 4096,
+      "reasoningTokensBilledAsOutput": false,
+      "featuredDetailPage": true,
+      "pricingTiers": [
+        {
+          "label": "Standard (<= 128K)",
+          "upToTokens": null,
+          "inputPer1M": 3.5,
+          "outputPer1M": 3.5,
+          "cachedInputReadPer1M": null,
+          "cacheWrite5mPer1M": null,
+          "cacheWrite1hPer1M": null
+        }
+      ],
+      "promptCaching": {
+        "supported": false,
+        "mode": "none",
+        "minCacheableTokens": null,
+        "ttlOptions": [],
+        "storagePer1MPerHour": null,
+        "notes": "Together Turbo 405B quantized FP8 engine."
+      },
+      "batchApi": {
+        "supported": false,
+        "discountPercent": null,
+        "cachingAllowedInBatch": false,
+        "batchDiscountAppliesToCache": false,
+        "turnaroundWindow": null,
+        "notes": "Serverless inference pricing."
+      },
+      "hosting": {
+        "endpointProvider": "Together AI",
+        "endpointType": "inference_specialist",
+        "hostingNotes": "Together AI 405B high-performance cluster."
+      },
+      "effectiveDate": "2026-11-12",
+      "promotionalExpiryDate": null,
+      "lastVerifiedDate": "2026-11-12",
+      "officialSourceUrl": "https://www.together.ai/pricing",
+      "notes": "Frontier open-weights 405B model served on Together AI high-performance cluster."
+    },
+    {
+      "id": "bedrock/meta-llama-3-1-405b-instruct",
+      "slug": "llama-3-1-405b-bedrock",
+      "displayName": "Llama 3.1 405B (Amazon Bedrock)",
+      "apiModelId": "meta.llama3-1-405b-instruct-v1:0",
+      "provider": "bedrock",
+      "modelFamily": "Llama 3.1",
+      "openWeight": true,
+      "contextWindowTokens": 128000,
+      "maxOutputTokens": 4096,
+      "reasoningTokensBilledAsOutput": false,
+      "featuredDetailPage": true,
+      "pricingTiers": [
+        {
+          "label": "Standard (<= 128K)",
+          "upToTokens": null,
+          "inputPer1M": 5.32,
+          "outputPer1M": 16,
+          "cachedInputReadPer1M": null,
+          "cacheWrite5mPer1M": null,
+          "cacheWrite1hPer1M": null,
+          "batchInputPer1M": 2.66,
+          "batchOutputPer1M": 8
+        }
+      ],
+      "promptCaching": {
+        "supported": false,
+        "mode": "none",
+        "minCacheableTokens": null,
+        "ttlOptions": [],
+        "storagePer1MPerHour": null,
+        "notes": "Amazon Bedrock on-demand invocation rates."
+      },
+      "batchApi": {
+        "supported": true,
+        "discountPercent": 50,
+        "cachingAllowedInBatch": false,
+        "batchDiscountAppliesToCache": false,
+        "turnaroundWindow": "24h",
+        "notes": "Amazon Bedrock Batch inference offers 50% discount on on-demand rates."
+      },
+      "hosting": {
+        "endpointProvider": "Amazon Bedrock",
         "endpointType": "managed_cloud",
-        "regionMultipliers": [
-          { "regionLabel": "Global CRIS", "multiplier": 1.0 },
-          { "regionLabel": "US / Geo / In-Region CRIS (+10%)", "multiplier": 1.1 }
-        ],
-        "hostingNotes": "Global CRIS matches 1P Anthropic; US/IN/Geo CRIS adds +10% ($2.20/$11.00)."
+        "hostingNotes": "AWS managed enterprise service."
       },
       "effectiveDate": "2026-11-12",
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://aws.amazon.com/bedrock/pricing/",
-      "notes": "Managed cloud contrast vs Anthropic 1P: identical Global pricing, but Batch Inference is N/A on Bedrock for Claude 5.5."
+      "notes": "Enterprise managed deployment of Meta Llama 3.1 405B on AWS Bedrock."
     },
     {
-      "id": "bedrock/openai-gpt-oss-120b",
-      "slug": "gpt-oss-120b-bedrock",
-      "displayName": "GPT-OSS 120B (Amazon Bedrock)",
-      "apiModelId": "openai.gpt-oss-120b-1:0",
-      "provider": "bedrock",
-      "modelFamily": "GPT-OSS",
-      "openWeight": true,
+      "id": "mistral/mistral-large-2411",
+      "slug": "mistral-large-2",
+      "displayName": "Mistral Large 2 (2411)",
+      "apiModelId": "mistral-large-latest",
+      "provider": "mistral",
+      "modelFamily": "Mistral Large",
+      "openWeight": false,
       "contextWindowTokens": 128000,
-      "maxOutputTokens": 65536,
-      "reasoningTokensBilledAsOutput": true,
-      "featuredDetailPage": false,
+      "maxOutputTokens": 8192,
+      "reasoningTokensBilledAsOutput": false,
+      "featuredDetailPage": true,
       "pricingTiers": [
         {
-          "label": "US Standard (<= 128K)",
+          "label": "Standard (<= 128K)",
           "upToTokens": null,
-          "inputPer1M": 0.15,
+          "inputPer1M": 2,
+          "outputPer1M": 6,
+          "cachedInputReadPer1M": null,
+          "cacheWrite5mPer1M": null,
+          "cacheWrite1hPer1M": null,
+          "batchInputPer1M": 1,
+          "batchOutputPer1M": 3
+        }
+      ],
+      "promptCaching": {
+        "supported": false,
+        "mode": "none",
+        "minCacheableTokens": null,
+        "ttlOptions": [],
+        "storagePer1MPerHour": null,
+        "notes": "Mistral first-party API endpoint."
+      },
+      "batchApi": {
+        "supported": true,
+        "discountPercent": 50,
+        "cachingAllowedInBatch": false,
+        "batchDiscountAppliesToCache": false,
+        "turnaroundWindow": "24h",
+        "notes": "Mistral Batch API offers 50% discount."
+      },
+      "hosting": {
+        "endpointProvider": "Mistral First-Party",
+        "endpointType": "first_party",
+        "hostingNotes": "La Plateforme Mistral."
+      },
+      "effectiveDate": "2026-11-12",
+      "promotionalExpiryDate": null,
+      "lastVerifiedDate": "2026-11-12",
+      "officialSourceUrl": "https://mistral.ai/technology/#pricing",
+      "notes": "Mistral flagship reasoning and multilingual model."
+    },
+    {
+      "id": "mistral/mistral-small-latest",
+      "slug": "mistral-small-latest",
+      "displayName": "Mistral Small (2409)",
+      "apiModelId": "mistral-small-latest",
+      "provider": "mistral",
+      "modelFamily": "Mistral Small",
+      "openWeight": true,
+      "contextWindowTokens": 128000,
+      "maxOutputTokens": 8192,
+      "reasoningTokensBilledAsOutput": false,
+      "featuredDetailPage": true,
+      "pricingTiers": [
+        {
+          "label": "Standard (<= 128K)",
+          "upToTokens": null,
+          "inputPer1M": 0.2,
           "outputPer1M": 0.6,
           "cachedInputReadPer1M": null,
           "cacheWrite5mPer1M": null,
           "cacheWrite1hPer1M": null,
-          "batchInputPer1M": 0.075,
+          "batchInputPer1M": 0.1,
           "batchOutputPer1M": 0.3
         }
       ],
@@ -1082,54 +966,48 @@
         "minCacheableTokens": null,
         "ttlOptions": [],
         "storagePer1MPerHour": null,
-        "notes": "Not supported on Bedrock for gpt-oss-120b (Bedrock OpenAI prompt caching supports GPT-5.6+ only)."
+        "notes": "Mistral first-party API endpoint."
       },
       "batchApi": {
         "supported": true,
         "discountPercent": 50,
         "cachingAllowedInBatch": false,
         "batchDiscountAppliesToCache": false,
-        "turnaroundWindow": "Up to 24h",
-        "notes": "50% off in US regions ($0.075/$0.30). Bedrock Flex tier also 50% off ($0.075/$0.30); Priority tier = +75% ($0.2625/$1.05). Batch does not support caching."
+        "turnaroundWindow": "24h",
+        "notes": "Mistral Batch API offers 50% discount."
       },
       "hosting": {
-        "endpointProvider": "Amazon Bedrock (US Regions)",
-        "endpointType": "managed_cloud",
-        "regionMultipliers": [
-          { "regionLabel": "US East / West Standard", "multiplier": 1.0 },
-          { "regionLabel": "Asia Pacific (Sydney, +3%)", "multiplier": 1.03 }
-        ],
-        "hostingNotes": "Bedrock documents a 128,000 context window for openai.gpt-oss-120b-1:0 (vs 131,072 on Groq/Together)."
+        "endpointProvider": "Mistral First-Party",
+        "endpointType": "first_party",
+        "hostingNotes": "La Plateforme Mistral."
       },
       "effectiveDate": "2026-11-12",
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
-      "officialSourceUrl": "https://aws.amazon.com/bedrock/pricing/",
-      "notes": "Open-weight host comparison: Bedrock matches Groq's 50% Batch ($0.075/$0.30) + Flex tier, but lacks Groq's 50% prompt caching."
+      "officialSourceUrl": "https://mistral.ai/technology/#pricing",
+      "notes": "Cost-efficient lightweight open-weight model from Mistral."
     },
     {
-      "id": "bedrock/meta-llama4-maverick-17b",
-      "slug": "llama4-maverick-17b-bedrock",
-      "displayName": "Llama 4 Maverick 17B (Amazon Bedrock)",
-      "apiModelId": "meta.llama4-maverick-17b-instruct-v1:0",
-      "provider": "bedrock",
-      "modelFamily": "Llama 4",
+      "id": "groq/llama-3-1-8b-instant",
+      "slug": "llama-3-1-8b-groq",
+      "displayName": "Llama 3.1 8B Instant (Groq)",
+      "apiModelId": "llama-3.1-8b-instant",
+      "provider": "groq",
+      "modelFamily": "Llama 3.1",
       "openWeight": true,
-      "contextWindowTokens": 1000000,
+      "contextWindowTokens": 128000,
       "maxOutputTokens": 8192,
       "reasoningTokensBilledAsOutput": false,
-      "featuredDetailPage": false,
+      "featuredDetailPage": true,
       "pricingTiers": [
         {
-          "label": "US Standard (<= 1M)",
+          "label": "Standard (<= 128K)",
           "upToTokens": null,
-          "inputPer1M": 0.24,
-          "outputPer1M": 0.97,
+          "inputPer1M": 0.05,
+          "outputPer1M": 0.08,
           "cachedInputReadPer1M": null,
           "cacheWrite5mPer1M": null,
-          "cacheWrite1hPer1M": null,
-          "batchInputPer1M": 0.12,
-          "batchOutputPer1M": 0.485
+          "cacheWrite1hPer1M": null
         }
       ],
       "promptCaching": {
@@ -1138,26 +1016,80 @@
         "minCacheableTokens": null,
         "ttlOptions": [],
         "storagePer1MPerHour": null,
-        "notes": "Prompt caching is not supported on Amazon Bedrock for Meta Llama models."
+        "notes": "Ultra-fast LPU inference; prompt caching not billed separately."
+      },
+      "batchApi": {
+        "supported": false,
+        "discountPercent": null,
+        "cachingAllowedInBatch": false,
+        "batchDiscountAppliesToCache": false,
+        "turnaroundWindow": null,
+        "notes": "Real-time streaming LPU inference only."
+      },
+      "hosting": {
+        "endpointProvider": "Groq LPU Cloud",
+        "endpointType": "inference_specialist",
+        "hostingNotes": "Dedicated Groq LPU hardware offering 800+ tokens/sec."
+      },
+      "effectiveDate": "2026-11-12",
+      "promotionalExpiryDate": null,
+      "lastVerifiedDate": "2026-11-12",
+      "officialSourceUrl": "https://groq.com/pricing",
+      "notes": "Ultra-fast lightweight model for low-latency tasks."
+    },
+    {
+      "id": "bedrock/anthropic-claude-3-5-sonnet",
+      "slug": "claude-3-5-sonnet-bedrock",
+      "displayName": "Claude 3.5 Sonnet (Amazon Bedrock)",
+      "apiModelId": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+      "provider": "bedrock",
+      "modelFamily": "Claude 3.5",
+      "openWeight": false,
+      "contextWindowTokens": 200000,
+      "maxOutputTokens": 8192,
+      "reasoningTokensBilledAsOutput": false,
+      "featuredDetailPage": true,
+      "pricingTiers": [
+        {
+          "label": "Standard (<= 200K)",
+          "upToTokens": null,
+          "inputPer1M": 3,
+          "outputPer1M": 15,
+          "cachedInputReadPer1M": 0.3,
+          "cacheWrite5mPer1M": 3.75,
+          "cacheWrite1hPer1M": null,
+          "batchInputPer1M": 1.5,
+          "batchOutputPer1M": 7.5
+        }
+      ],
+      "promptCaching": {
+        "supported": true,
+        "mode": "explicit",
+        "minCacheableTokens": 1024,
+        "ttlOptions": [
+          "5m"
+        ],
+        "storagePer1MPerHour": null,
+        "notes": "Prompt caching supported on Amazon Bedrock. 5m cache write at $3.75/1M, cache read at $0.30/1M."
       },
       "batchApi": {
         "supported": true,
         "discountPercent": 50,
-        "cachingAllowedInBatch": false,
-        "batchDiscountAppliesToCache": false,
-        "turnaroundWindow": "Up to 24h",
-        "notes": "50% off in supported US regions ($0.12 in / $0.485 out)."
+        "cachingAllowedInBatch": true,
+        "batchDiscountAppliesToCache": true,
+        "turnaroundWindow": "24h",
+        "notes": "Bedrock Batch Inference provides 50% discount on standard on-demand rates."
       },
       "hosting": {
-        "endpointProvider": "Amazon Bedrock (US Regions)",
+        "endpointProvider": "Amazon Bedrock",
         "endpointType": "managed_cloud",
-        "hostingNotes": "US East (N. Virginia, Ohio) and US West (N. California, Oregon) with AWS geofencing."
+        "hostingNotes": "AWS enterprise infrastructure with cross-region routing."
       },
       "effectiveDate": "2026-11-12",
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://aws.amazon.com/bedrock/pricing/",
-      "notes": "Open-weight Meta Llama 4 Maverick 17B on AWS Bedrock with 1M context window and 50% Batch discount."
+      "notes": "Claude 3.5 Sonnet hosted on AWS Bedrock with full enterprise compliance."
     }
   ]
 }

@@ -11,20 +11,22 @@ const SITE_URL =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "LLM Cost Intelligence — Workload-First API Pricing Calculator",
+    default:
+      "LLM API Pricing Calculator 2026 - Claude 3.5 Sonnet, GPT-4o, DeepSeek V3 & Gemini 2.0",
     template: "%s | LLM Cost Intelligence",
   },
   description:
-    "Client-side LLM API cost calculator across 8 providers. Models prompt caching writes & reads, Batch API stacking rules, long-context cliffs, and multi-turn agent scaling.",
+    "Free client-side LLM API pricing calculator modeling real-world prompt caching write/read break-even, Batch API discount stacking (up to 50% off), long-context cliffs, and multi-turn agent growth across 20 models and 8 providers.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     siteName: "LLM Cost Intelligence",
-    title: "LLM Cost Intelligence — Workload-First API Pricing Calculator",
+    title:
+      "LLM API Pricing Calculator 2026 - Claude 3.5 Sonnet, GPT-4o, DeepSeek V3 & Gemini 2.0",
     description:
-      "Calculate monthly LLM API costs with verified prompt caching, Batch API, long-context tier cliffs, and multi-turn scaling. 100% client-side.",
+      "Calculate real monthly LLM API bills with verified prompt caching write/read break-even, Batch API stacking, and multi-turn agent scaling. 100% client-side FinOps.",
   },
 };
 

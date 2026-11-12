@@ -2,7 +2,8 @@ import Link from "next/link";
 
 const NAV_LINKS = [
   { href: "/", label: "Calculator" },
-  { href: "/compare/rag-qa/", label: "Workloads" },
+  { href: "/models/", label: "Models" },
+  { href: "/compare/", label: "Workloads" },
   { href: "/guides/prompt-caching-write-vs-read-breakeven/", label: "Guides" },
   { href: "/methodology/", label: "Methodology" },
   { href: "/about/", label: "About" },
@@ -11,6 +12,34 @@ const NAV_LINKS = [
 export function Header() {
   return (
     <header className="no-print sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+      {/* Ecosystem Network Announcement Bar */}
+      <div className="border-b border-slate-800 bg-slate-900 px-4 py-1.5 text-[11px] text-slate-300 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2">
+          <span className="font-medium text-slate-400">
+            Everyday Suite Ecosystem
+          </span>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+            <a
+              href="https://everydaypdf.me"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-emerald-400 hover:text-emerald-300 transition-colors"
+            >
+              Need PDF Tools? 52+ free at EverydayPDF.me →
+            </a>
+            <span className="text-slate-600 hidden sm:inline">|</span>
+            <a
+              href="https://cut.everydaypdf.me"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-300 hover:text-white transition-colors"
+            >
+              Free Photo &amp; ID Studio: EverydayCut →
+            </a>
+          </div>
+        </div>
+      </div>
+
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <Link
           href="/"

@@ -38,9 +38,12 @@ export default function HomePage() {
 
       <section className="no-print space-y-3">
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="rounded-full bg-slate-900 px-2.5 py-0.5 font-semibold text-emerald-400">
-            20 Verified Models · 8 Providers
-          </span>
+          <Link
+            href="/models/"
+            className="rounded-full bg-slate-900 px-2.5 py-0.5 font-semibold text-emerald-400 hover:bg-slate-800 transition-colors"
+          >
+            {registry.models.length} Verified Models · {new Set(registry.models.map((m) => m.provider)).size} Providers →
+          </Link>
           <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 font-medium text-slate-600">
             Pricing Verified {registry.registryUpdatedAt}
           </span>
@@ -139,6 +142,14 @@ export default function HomePage() {
                 </Link>
               </li>
             ))}
+            <li className="pt-1">
+              <Link
+                href="/models/"
+                className="font-semibold text-emerald-700 hover:underline"
+              >
+                Browse all {registry.models.length} production models →
+              </Link>
+            </li>
           </ul>
         </div>
       </section>
