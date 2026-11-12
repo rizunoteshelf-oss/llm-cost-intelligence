@@ -72,7 +72,68 @@ export function LiveSpendLeaderboard({
     );
   }, [validEstimates]);
 
-  // Top 5 models for live leaderboard visual
+  const isBudgetOrMini = useMemo(() => {
+    if (!frontierBenchmark) return false;
+    const name = frontierBenchmark.model.displayName.toLowerCase();
+    const id = frontierBenchmark.model.apiModelId.toLowerCase();
+    return (
+      name.includes("mini") ||
+      name.includes("haiku") ||
+      name.includes("flash") ||
+      name.includes("instant") ||
+      name.includes("8b") ||
+      id.includes("mini") ||
+      id.includes("haiku") ||
+      id.includes("flash")
+    );
+  }, [frontierBenchmark]);
+
+  const baselineLabel = isBudgetOrMini
+    ? "Reference Baseline"
+    : "Frontier Baseline";
+
+  // Representative optimization metrics across models benefiting from active modifiers
+  const optimizationSummary = useMemo(() => {
+    const modelsWithSavings = validEstimates.filter(
+      (e) => e.savingsPercent > 0.1,
+    );
+
+    if (modelsWithSavings.length === 0) {
+      return {
+        percent: 0,
+        monthlyUsd: 0,
+        modelName: null,
+      };
+    }
+
+    // If reference baseline model has active savings, use it for direct comparability
+    if (frontierBenchmark && frontierBenchmark.savingsPercent > 0.1) {
+      return {
+        percent: frontierBenchmark.savingsPercent,
+        monthlyUsd: frontierBenchmark.monthlySavingsUsd,
+        modelName: frontierBenchmark.model.displayName,
+      };
+    }
+
+    // Otherwise select the model with the highest savings
+    const best = [...modelsWithSavings].sort(
+      (a, b) => b.savingsPercent - a.savingsPercent,
+    )[0];
+    if (!best) {
+      return {
+        percent: 0,
+        monthlyUsd: 0,
+        modelName: null,
+      };
+    }
+    return {
+      percent: best.savingsPercent,
+      monthlyUsd: best.monthlySavingsUsd,
+      modelName: best.model.displayName,
+    };
+  }, [validEstimates, frontierBenchmark]);
+
+  // Top 6 models for live leaderboard visual
   const topModels = useMemo(() => {
     return validEstimates.slice(0, 6);
   }, [validEstimates]);
@@ -82,9 +143,6 @@ export function LiveSpendLeaderboard({
     if (topModels.length === 0) return 1;
     return Math.max(...topModels.map((m) => m.monthlyCostUsd), 1);
   }, [topModels]);
-
-  const totalMonthlySavings = lowestModel?.monthlySavingsUsd ?? 0;
-  const savingsPct = lowestModel?.savingsPercent ?? 0;
 
   return (
     <div className="space-y-4">
@@ -127,65 +185,100 @@ export function LiveSpendLeaderboard({
           </button>
         </div>
 
-        {/* Spend Metrics Grid */}
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {/* Spend Metrics Grid (3 equal columns) */}
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Lowest Cost Callout */}
-          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
-            <div className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-              <Sparkles className="h-3 w-3" />
-              <span>Lowest Cost</span>
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                <Sparkles className="h-3 w-3" />
+                <span>Lowest Cost</span>
+              </div>
+              <div className="mt-1 font-mono text-xl font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                {lowestModel ? fmtUsd(lowestModel.monthlyCostUsd) : "—"}
+                <span className="text-xs font-normal text-emerald-600/70 dark:text-emerald-400/70">
+                  /mo
+                </span>
+              </div>
+              <div
+                className="mt-1 text-[11px] font-medium leading-snug text-slate-700 dark:text-slate-300 line-clamp-2 min-h-[30px]"
+                title={lowestModel?.model.displayName}
+              >
+                {lowestModel?.model.displayName ?? "No matching model"}
+              </div>
             </div>
-            <div className="mt-1 font-mono text-xl font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums">
-              {lowestModel ? fmtUsd(lowestModel.monthlyCostUsd) : "—"}
-              <span className="text-xs font-normal text-emerald-600/70 dark:text-emerald-400/70">
-                /mo
-              </span>
-            </div>
-            <div className="mt-0.5 truncate text-[11px] font-medium text-slate-600 dark:text-slate-300">
-              {lowestModel?.model.displayName ?? "No matching model"}
-            </div>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-1 border-t border-emerald-500/10 pt-1">
               {lowestModel ? `${fmtUsd(lowestModel.dailyCostUsd)}/day` : ""}
             </div>
           </div>
 
-          {/* Frontier Benchmark */}
-          <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-[#161F30] p-3">
-            <div className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Frontier Baseline
+          {/* Reference / Frontier Baseline */}
+          <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-[#161F30] p-3 flex flex-col justify-between">
+            <div>
+              <div className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {baselineLabel}
+              </div>
+              <div className="mt-1 font-mono text-xl font-bold text-slate-900 dark:text-white tabular-nums">
+                {frontierBenchmark ? fmtUsd(frontierBenchmark.monthlyCostUsd) : "—"}
+                <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
+                  /mo
+                </span>
+              </div>
+              <div
+                className="mt-1 text-[11px] font-medium leading-snug text-slate-700 dark:text-slate-200 line-clamp-2 min-h-[30px]"
+                title={frontierBenchmark?.model.displayName}
+              >
+                {frontierBenchmark?.model.displayName ?? "—"}
+              </div>
             </div>
-            <div className="mt-1 font-mono text-xl font-bold text-slate-900 dark:text-white tabular-nums">
-              {frontierBenchmark ? fmtUsd(frontierBenchmark.monthlyCostUsd) : "—"}
-              <span className="text-xs font-normal text-slate-500 dark:text-slate-400">
-                /mo
-              </span>
-            </div>
-            <div className="mt-0.5 truncate text-[11px] font-medium text-slate-700 dark:text-slate-200">
-              {frontierBenchmark?.model.displayName ?? "—"}
-            </div>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-              {lowestModel && frontierBenchmark && frontierBenchmark.monthlyCostUsd > lowestModel.monthlyCostUsd
-                ? `${(frontierBenchmark.monthlyCostUsd / Math.max(0.01, lowestModel.monthlyCostUsd)).toFixed(1)}x spread`
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-1 border-t border-slate-200 dark:border-white/5 pt-1">
+              {lowestModel &&
+              frontierBenchmark &&
+              frontierBenchmark.monthlyCostUsd > lowestModel.monthlyCostUsd
+                ? `${(
+                    frontierBenchmark.monthlyCostUsd /
+                    Math.max(0.01, lowestModel.monthlyCostUsd)
+                  ).toFixed(1)}x spread`
                 : "Baseline"}
             </div>
           </div>
 
           {/* Cache & Batch Savings Callout */}
-          <div className="col-span-2 sm:col-span-1 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-3">
-            <div className="flex items-center gap-1 text-[10px] font-semibold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider">
-              <TrendingDown className="h-3 w-3" />
-              <span>Optimization</span>
+          <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-3 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-1 text-[10px] font-semibold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider">
+                <TrendingDown className="h-3 w-3" />
+                <span>Optimization</span>
+              </div>
+              <div className="mt-1 font-mono text-xl font-bold text-cyan-600 dark:text-cyan-400 tabular-nums">
+                {optimizationSummary.percent > 0.1
+                  ? `-${optimizationSummary.percent.toFixed(1)}%`
+                  : "0.0%"}
+              </div>
+              <div
+                className="mt-1 text-[11px] font-medium leading-snug text-slate-700 dark:text-slate-200 line-clamp-2 min-h-[30px]"
+                title={
+                  optimizationSummary.modelName
+                    ? `${fmtUsd(optimizationSummary.monthlyUsd, 0)}/mo saved on ${optimizationSummary.modelName}`
+                    : "No active discount"
+                }
+              >
+                {optimizationSummary.percent > 0.1 &&
+                optimizationSummary.monthlyUsd > 0
+                  ? `${fmtUsd(optimizationSummary.monthlyUsd, 0)}/mo (${optimizationSummary.modelName})`
+                  : "No active discount"}
+              </div>
             </div>
-            <div className="mt-1 font-mono text-xl font-bold text-cyan-600 dark:text-cyan-400 tabular-nums">
-              {savingsPct > 0.1 ? `-${savingsPct.toFixed(1)}%` : "0.0%"}
-            </div>
-            <div className="mt-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-200">
-              {totalMonthlySavings > 0
-                ? `${fmtUsd(totalMonthlySavings, 0)}/mo saved`
-                : "No active discount"}
-            </div>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400">
-              {calculatorInput.useBatch ? "Batch 50% stacking" : "Sync rate"}
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-1 border-t border-cyan-500/10 pt-1">
+              {calculatorInput.useBatch && calculatorInput.useCaching
+                ? "Cache + Batch stacked"
+                : calculatorInput.useBatch
+                  ? "Batch -50% discount"
+                  : calculatorInput.useCaching
+                    ? `${Math.round(calculatorInput.cacheHitRate * 100)}% cache hit active`
+                    : calculatorInput.useOffPeak
+                      ? "Off-Peak -50% discount"
+                      : "Sync standard rates"}
             </div>
           </div>
         </div>
@@ -221,7 +314,10 @@ export function LiveSpendLeaderboard({
                       >
                         {idx + 1}
                       </span>
-                      <span className="truncate font-semibold text-slate-900 dark:text-white">
+                      <span
+                        className="truncate font-semibold text-slate-900 dark:text-white"
+                        title={est.model.displayName}
+                      >
                         {est.model.displayName}
                       </span>
                       <span className="text-[10px] text-slate-400 dark:text-slate-500 hidden sm:inline">

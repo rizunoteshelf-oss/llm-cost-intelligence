@@ -62,7 +62,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="flex min-h-screen flex-col bg-[#f8fafc] dark:bg-[#090D16] text-slate-900 dark:text-slate-100 antialiased selection:bg-emerald-500/20 selection:text-emerald-400">
+      <body className="flex min-h-screen flex-col bg-[#f1f5f9] dark:bg-[#090D16] text-slate-900 dark:text-slate-100 antialiased selection:bg-emerald-500/20 selection:text-emerald-400">
         {enableAdsense && adsenseClientId ? (
           <Script
             id="adsense-init"

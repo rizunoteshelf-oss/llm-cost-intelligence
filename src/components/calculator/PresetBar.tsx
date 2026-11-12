@@ -29,6 +29,18 @@ const PRESET_ICONS: Record<WorkloadPresetId, React.ComponentType<{ className?: s
   extraction: Braces,
 };
 
+function fmtCompactTokens(count: number): string {
+  if (count >= 1_000_000) {
+    const val = count / 1_000_000;
+    return `${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}M`;
+  }
+  if (count >= 1_000) {
+    const val = count / 1_000;
+    return `${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}k`;
+  }
+  return String(count);
+}
+
 export function PresetBar({ activePresetId, onSelectPreset }: PresetBarProps) {
   const [hoveredPreset, setHoveredPreset] = useState<WorkloadPresetId | null>(null);
 
@@ -59,12 +71,13 @@ export function PresetBar({ activePresetId, onSelectPreset }: PresetBarProps) {
       <div
         role="group"
         aria-label="Workload presets"
-        className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5"
+        className="grid grid-cols-2 sm:grid-cols-3 gap-3"
       >
         {WORKLOAD_PRESETS.map((preset) => {
           const isActive = activePresetId === preset.id;
           const Icon = PRESET_ICONS[preset.id] || Sparkles;
           const editorial = PRESET_EDITORIAL[preset.id];
+          const totalInTokens = preset.prefixTokens + preset.dynamicInputTokens;
 
           return (
             <div
@@ -76,7 +89,7 @@ export function PresetBar({ activePresetId, onSelectPreset }: PresetBarProps) {
               <button
                 type="button"
                 onClick={() => onSelectPreset(preset.id)}
-                className={`group relative flex w-full flex-col items-start rounded-xl border p-3 text-left transition-all ${
+                className={`group relative flex w-full flex-col items-start rounded-xl border p-3.5 text-left transition-all ${
                   isActive
                     ? "border-emerald-500/60 bg-emerald-500/10 dark:bg-emerald-500/15 text-slate-900 dark:text-white shadow-xs ring-1 ring-emerald-500/40"
                     : "border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-[#161F30]"
@@ -99,32 +112,30 @@ export function PresetBar({ activePresetId, onSelectPreset }: PresetBarProps) {
                   )}
                 </div>
 
-                <div className="mt-2.5 space-y-0.5">
-                  <span className="block text-xs font-bold leading-snug tracking-tight text-slate-900 dark:text-white sm:text-sm">
+                <div className="mt-2.5 space-y-1 w-full">
+                  <span className="block text-xs font-bold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-sm">
                     {preset.name}
                   </span>
                   <div className="flex items-center gap-1 font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
                     <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                      {(preset.prefixTokens + preset.dynamicInputTokens).toLocaleString("en-US")}
+                      {fmtCompactTokens(totalInTokens)} in
                     </span>
-                    <span className="text-slate-400 dark:text-slate-600">in</span>
-                    <span>·</span>
+                    <span className="text-slate-400 dark:text-slate-600">·</span>
                     <span className="text-cyan-600 dark:text-cyan-400 font-medium">
-                      {preset.outputTokens.toLocaleString("en-US")}
+                      {fmtCompactTokens(preset.outputTokens)} out
                     </span>
-                    <span className="text-slate-400 dark:text-slate-600">out</span>
                   </div>
                 </div>
 
-                <div className="mt-1.5 flex items-center justify-between w-full text-[10px] text-slate-400 dark:text-slate-500 font-mono">
-                  <span>{preset.requestsPerDay.toLocaleString("en-US")} req/d</span>
+                <div className="mt-2 flex items-center justify-between w-full text-[10px] text-slate-400 dark:text-slate-500 font-mono border-t border-slate-100 dark:border-white/5 pt-1.5">
+                  <span>{fmtCompactTokens(preset.requestsPerDay)} req/d</span>
                   <span>{Math.round(preset.cacheHitRate * 100)}% hit</span>
                 </div>
               </button>
 
               {/* Hover Tooltip / Profile Drawer */}
               {hoveredPreset === preset.id && editorial && (
-                <div className="pointer-events-none absolute left-0 top-full z-40 mt-1.5 w-64 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-900/95 dark:bg-[#0B101D]/95 p-3 text-white shadow-xl backdrop-blur-sm transition-opacity hidden sm:block">
+                <div className="pointer-events-none absolute left-0 top-full z-40 mt-1.5 w-72 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-900/95 dark:bg-[#0B101D]/95 p-3.5 text-white shadow-xl backdrop-blur-sm transition-opacity hidden sm:block">
                   <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
                     <HelpCircle className="h-3 w-3" />
                     <span>Traffic Profile: {preset.name}</span>
@@ -132,9 +143,9 @@ export function PresetBar({ activePresetId, onSelectPreset }: PresetBarProps) {
                   <p className="mt-1.5 text-[11px] leading-relaxed text-slate-300">
                     {editorial.summary}
                   </p>
-                  <div className="mt-2 border-t border-white/10 pt-1.5 font-mono text-[10px] text-slate-400">
-                    Prefix: {preset.prefixTokens.toLocaleString()} tok · Output:{" "}
-                    {preset.outputTokens.toLocaleString()} tok
+                  <div className="mt-2.5 border-t border-white/10 pt-1.5 font-mono text-[10px] text-slate-400 flex items-center justify-between">
+                    <span>Prefix: {preset.prefixTokens.toLocaleString()} tok</span>
+                    <span>Output: {preset.outputTokens.toLocaleString()} tok</span>
                   </div>
                 </div>
               )}
