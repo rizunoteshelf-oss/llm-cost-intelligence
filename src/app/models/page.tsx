@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import rawRegistry from "@/data/models.json";
 import { AdSlot } from "@/components/ads/AdSlot";
+import { DataProvenanceBar } from "@/components/layout/DataProvenanceBar";
 import { ModelsDirectory } from "@/components/models/ModelsDirectory";
 import type { PricingRegistry } from "@/lib/pricing/schema";
 
 const registry = rawRegistry as unknown as PricingRegistry;
+const providerCount = new Set(registry.models.map((m) => m.provider)).size;
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") ||
@@ -51,31 +53,31 @@ export default function ModelsDirectoryPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      <nav aria-label="Breadcrumb" className="no-print text-xs text-slate-500">
-        <Link href="/" className="hover:text-slate-900">
+      <nav aria-label="Breadcrumb" className="no-print text-xs text-slate-500 dark:text-slate-400">
+        <Link href="/" className="hover:text-slate-900 dark:hover:text-white transition-colors">
           Calculator
         </Link>{" "}
-        / <span className="font-semibold text-slate-800">Models Directory</span>
+        / <span className="font-semibold text-slate-800 dark:text-slate-200">Models Directory</span>
       </nav>
 
-      <header className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="rounded-full bg-slate-900 px-2.5 py-0.5 font-semibold text-emerald-400">
-            {registry.models.length} Production Models Verified
-          </span>
-          <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 font-mono text-slate-600">
-            Updated {registry.registryUpdatedAt}
-          </span>
+      <header className="space-y-4">
+        <DataProvenanceBar
+          modelCount={registry.models.length}
+          providerCount={providerCount}
+          registryUpdatedAt={registry.registryUpdatedAt}
+        />
+
+        <div className="space-y-2">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl font-sans">
+            LLM Model Pricing Directory
+          </h1>
+          <p className="max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
+            Browse verified production rate cards, prompt caching break-even
+            thresholds, context windows, and Batch API discounts for all supported
+            frontier models. Click any model to view its granular cost rules or
+            simulate your workload.
+          </p>
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-          LLM Model Pricing Directory
-        </h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
-          Browse exact production rate cards, prompt caching break-even
-          thresholds, context windows, and Batch API discounts for all supported
-          frontier models. Click any model to view its granular cost rules or
-          simulate your workload.
-        </p>
       </header>
 
       <ModelsDirectory models={registry.models} />

@@ -88,26 +88,26 @@ export default async function GuideDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      <nav aria-label="Breadcrumb" className="text-xs text-slate-500">
-        <Link href="/" className="hover:text-slate-900">
+      <nav aria-label="Breadcrumb" className="text-xs text-slate-500 dark:text-slate-400">
+        <Link href="/" className="hover:text-slate-900 dark:hover:text-white transition-colors">
           Calculator
         </Link>{" "}
-        / <span className="font-semibold text-slate-800">{guide.title}</span>
+        / <span className="font-semibold text-slate-800 dark:text-slate-200">{guide.title}</span>
       </nav>
 
       <header className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-          <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 font-semibold text-emerald-800">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
             Engineering Guide
           </span>
           <span>{guide.readingTimeMinutes} min read</span>
           <span>·</span>
           <span className="font-mono">Updated {guide.updatedAt}</span>
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl font-sans">
           {guide.title}
         </h1>
-        <p className="text-sm leading-relaxed text-slate-600 sm:text-base">
+        <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
           {guide.summary}
         </p>
       </header>
@@ -116,21 +116,21 @@ export default async function GuideDetailPage({
         {guide.sections.map((section, idx) => (
           <section
             key={idx}
-            className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6"
+            className="space-y-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-6 shadow-xs"
           >
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
               {section.heading}
             </h2>
             {section.paragraphs.map((p, pIdx) => (
               <p
                 key={pIdx}
-                className="text-sm leading-relaxed text-slate-700"
+                className="text-sm leading-relaxed text-slate-700 dark:text-slate-300"
               >
                 {p}
               </p>
             ))}
             {section.callout && (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 text-xs leading-relaxed text-emerald-950">
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-xs leading-relaxed text-emerald-900 dark:text-emerald-300">
                 {section.callout}
               </div>
             )}
@@ -138,11 +138,11 @@ export default async function GuideDetailPage({
         ))}
       </div>
 
-      <section className="rounded-2xl border border-slate-200 bg-slate-900 p-6 text-white">
-        <h2 className="text-base font-bold">
+      <section className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-900 dark:bg-[#161F30] p-6 text-white shadow-xs">
+        <h2 className="text-base font-bold text-white">
           Test These Numbers on Your Own Workload
         </h2>
-        <p className="mt-1 text-xs text-slate-300">
+        <p className="mt-1 text-xs text-slate-300 dark:text-slate-400">
           All calculations execute locally in your browser with zero server
           calls.
         </p>
@@ -150,14 +150,14 @@ export default async function GuideDetailPage({
           {guide.relatedPreset ? (
             <Link
               href={`/compare/${guide.relatedPreset}/`}
-              className="rounded-lg bg-emerald-500 px-4 py-2 text-slate-950 hover:bg-emerald-400"
+              className="rounded-lg bg-emerald-500 px-4 py-2 text-slate-950 font-bold hover:bg-emerald-400 transition-colors"
             >
               Open {guide.relatedPreset} Comparison →
             </Link>
           ) : null}
           <Link
             href="/"
-            className="rounded-lg border border-slate-600 px-4 py-2 text-white hover:bg-slate-800"
+            className="rounded-lg border border-slate-700 dark:border-white/20 bg-white/5 px-4 py-2 text-white hover:bg-white/10 transition-colors"
           >
             Launch Main Calculator
           </Link>
@@ -166,9 +166,9 @@ export default async function GuideDetailPage({
 
       <nav
         aria-label="More Engineering Guides"
-        className="rounded-2xl border border-slate-200 bg-white p-6"
+        className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-6 shadow-xs"
       >
-        <h2 className="text-sm font-bold text-slate-900">
+        <h2 className="text-sm font-bold text-slate-900 dark:text-white">
           More FinOps &amp; Pricing Guides
         </h2>
         <ul className="mt-3 space-y-2 text-xs">
@@ -176,7 +176,7 @@ export default async function GuideDetailPage({
             <li key={other.slug}>
               <Link
                 href={`/guides/${other.slug}/`}
-                className="font-medium text-emerald-700 hover:underline"
+                className="font-medium text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 hover:underline transition-colors"
               >
                 {other.title} →
               </Link>

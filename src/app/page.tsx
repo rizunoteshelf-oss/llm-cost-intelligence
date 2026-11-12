@@ -2,9 +2,11 @@ import Link from "next/link";
 import rawRegistry from "@/data/models.json";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { CalculatorShell } from "@/components/calculator/CalculatorShell";
+import { DataProvenanceBar } from "@/components/layout/DataProvenanceBar";
 import type { PricingRegistry } from "@/lib/pricing/schema";
 
 const registry = rawRegistry as unknown as PricingRegistry;
+const providerCount = new Set(registry.models.map((m) => m.provider)).size;
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") ||
@@ -36,66 +38,75 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
       />
 
-      <section className="no-print space-y-3">
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <Link
-            href="/models/"
-            className="rounded-full bg-slate-900 px-2.5 py-0.5 font-semibold text-emerald-400 hover:bg-slate-800 transition-colors"
-          >
-            {registry.models.length} Verified Models · {new Set(registry.models.map((m) => m.provider)).size} Providers →
-          </Link>
-          <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 font-medium text-slate-600">
-            Pricing Verified {registry.registryUpdatedAt}
-          </span>
-        </div>
+      {/* Hero Header & Provenance Bar */}
+      <section className="no-print space-y-4">
+        <DataProvenanceBar
+          modelCount={registry.models.length}
+          providerCount={providerCount}
+          registryUpdatedAt={registry.registryUpdatedAt}
+        />
 
-        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-          Workload-First LLM API Cost Calculator
-        </h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
-          Compare monthly production costs across OpenAI, Anthropic, Google
-          Gemini, DeepSeek, Mistral, Groq, Together AI, and Amazon Bedrock.
-          Models real-world{" "}
-          <strong>cache writes &amp; reads, Batch API stacking rules</strong>,{" "}
-          <strong>long-context price cliffs</strong>, and{" "}
-          <strong>multi-turn agent growth</strong>—100% locally in your browser.
-        </p>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-5xl font-sans">
+            LLM API Cost &amp; FinOps Intelligence
+          </h1>
+          <p className="max-w-4xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
+            Workload-first cost simulation across OpenAI, Anthropic, Google Gemini,
+            DeepSeek, Mistral, Groq, Together AI, and Amazon Bedrock. Accurately
+            models{" "}
+            <strong className="text-slate-900 dark:text-white">
+              prompt cache break-even rates, 50% Batch API stacking
+            </strong>
+            ,{" "}
+            <strong className="text-slate-900 dark:text-white">
+              long-context cliffs
+            </strong>
+            , and{" "}
+            <strong className="text-slate-900 dark:text-white">
+              multi-turn agent conversation growth
+            </strong>
+            —100% locally in browser memory.
+          </p>
+        </div>
       </section>
 
+      {/* Live Split-Screen Calculator */}
       <CalculatorShell
         models={registry.models}
         registryUpdatedAt={registry.registryUpdatedAt}
         initialPresetId="rag-qa"
       />
 
-      <section className="no-print grid gap-6 border-t border-slate-200 pt-10 md:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="text-sm font-bold text-slate-900">
+      {/* Institutional Explanatory Grid */}
+      <section className="no-print grid gap-6 border-t border-slate-200 dark:border-white/10 pt-10 md:grid-cols-3">
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-6 shadow-xs transition-colors">
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white">
             Why Workload-First Beats Flat Rate Tables
           </h2>
-          <p className="mt-2 text-xs leading-relaxed text-slate-600">
-            Static $/1M token tables miss silent 512–4,096 token cache minimums,
-            Anthropic vs. OpenAI write multipliers, Together AI&apos;s 0% chat
-            batch discount, and Gemini&apos;s model-specific batch-caching
+          <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+            Static $/1M token rate cards ignore silent 512–4,096 token cache
+            minimums, Anthropic vs. OpenAI write surcharges, Together AI&apos;s 0%
+            batch chat discount, and Gemini&apos;s model-specific batch-caching
             exceptions.
           </p>
           <Link
             href="/methodology/"
-            className="mt-3 inline-block text-xs font-semibold text-emerald-700 hover:underline"
+            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
           >
-            Read exact pricing formulas →
+            <span>Read exact pricing formulas</span>
+            <span>→</span>
           </Link>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="text-sm font-bold text-slate-900">
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-6 shadow-xs transition-colors">
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white">
             Deep-Dive Workload Benchmarks
           </h2>
-          <ul className="mt-2 space-y-1.5 text-xs text-slate-600">
+          <ul className="mt-3 space-y-2 text-xs text-slate-600 dark:text-slate-400">
             <li>
               <Link
                 href="/compare/rag-qa/"
-                className="font-medium text-slate-800 hover:text-emerald-700 hover:underline"
+                className="font-medium text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline transition-colors"
               >
                 RAG Q&amp;A Cost Breakdown →
               </Link>
@@ -103,74 +114,58 @@ export default function HomePage() {
             <li>
               <Link
                 href="/compare/code-generation/"
-                className="font-medium text-slate-800 hover:text-emerald-700 hover:underline"
+                className="font-medium text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline transition-colors"
               >
-                Code Generation &amp; Repo Caching →
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/compare/support-agent/"
-                className="font-medium text-slate-800 hover:text-emerald-700 hover:underline"
-              >
-                Multi-Turn Support Agent Scaling →
+                Code Generation &amp; AI Agents →
               </Link>
             </li>
             <li>
               <Link
                 href="/compare/document-summarization/"
-                className="font-medium text-slate-800 hover:text-emerald-700 hover:underline"
+                className="font-medium text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline transition-colors"
               >
-                Long-Context Document Summarization →
+                Document Summarization &amp; Batch →
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/compare/support-agent/"
+                className="font-medium text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline transition-colors"
+              >
+                Multi-Turn Support Agent Growth →
               </Link>
             </li>
             <li>
               <Link
                 href="/compare/extraction/"
-                className="font-medium text-slate-800 hover:text-emerald-700 hover:underline"
+                className="font-medium text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline transition-colors"
               >
-                JSON / ETL Extraction →
-              </Link>
-            </li>
-            <li className="pt-1">
-              <Link
-                href="/compare/"
-                className="font-semibold text-emerald-700 hover:underline"
-              >
-                Browse all 5 workload benchmarks →
+                High-Volume JSON ETL Extraction →
               </Link>
             </li>
           </ul>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="text-sm font-bold text-slate-900">
-            Featured Model Rate Cards
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-6 shadow-xs transition-colors">
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+            Featured Rate Card Deep Dives
           </h2>
-          <ul className="mt-2 grid grid-cols-1 gap-1.5 text-xs text-slate-600">
-            {featuredModels.slice(0, 6).map((m) => (
-              <li key={m.id}>
-                <Link
-                  href={`/models/${m.slug}/`}
-                  className="font-medium text-slate-800 hover:text-emerald-700 hover:underline"
-                >
-                  {m.displayName} ({m.hosting.endpointProvider}) →
-                </Link>
-              </li>
-            ))}
-            <li className="pt-1">
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {featuredModels.map((m) => (
               <Link
-                href="/models/"
-                className="font-semibold text-emerald-700 hover:underline"
+                key={m.id}
+                href={`/models/${m.slug}/`}
+                className="rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-2.5 py-1 text-[11px] font-medium text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-900 dark:hover:text-white transition-colors"
               >
-                Browse all {registry.models.length} production models →
+                {m.displayName}
               </Link>
-            </li>
-          </ul>
+            ))}
+          </div>
         </div>
       </section>
 
-      <AdSlot slotId="home-bottom-editorial" />
+      {/* AdSense editorial slot (kept gated off via NEXT_PUBLIC_ENABLE_ADSENSE=false) */}
+      <AdSlot slotId="home-calculator-bottom" />
     </div>
   );
 }

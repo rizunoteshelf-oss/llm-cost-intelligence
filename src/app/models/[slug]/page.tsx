@@ -203,54 +203,54 @@ export default async function ModelDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
-      <nav aria-label="Breadcrumb" className="text-xs text-slate-500">
-        <Link href="/" className="hover:text-slate-900">
+      <nav aria-label="Breadcrumb" className="text-xs text-slate-500 dark:text-slate-400">
+        <Link href="/" className="hover:text-slate-900 dark:hover:text-white transition-colors">
           Calculator
         </Link>{" "}
         /{" "}
-        <Link href="/models/" className="hover:text-slate-900">
+        <Link href="/models/" className="hover:text-slate-900 dark:hover:text-white transition-colors">
           Models
         </Link>{" "}
         /{" "}
-        <span className="font-semibold text-slate-800">
+        <span className="font-semibold text-slate-800 dark:text-slate-200">
           {model.displayName}
         </span>
       </nav>
 
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="rounded-full bg-slate-900 px-2.5 py-0.5 font-semibold text-white">
+          <span className="rounded-full bg-slate-900 dark:bg-white px-2.5 py-0.5 font-semibold text-white dark:text-slate-900">
             {model.hosting.endpointProvider}
           </span>
           {model.openWeight && (
-            <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 font-semibold text-indigo-800">
+            <span className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 font-semibold text-indigo-600 dark:text-indigo-400">
               Open-Weight
             </span>
           )}
-          <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 font-mono text-slate-600">
+          <span className="rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] px-2.5 py-0.5 font-mono text-slate-600 dark:text-slate-300">
             Verified {model.lastVerifiedDate}
           </span>
         </div>
 
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl font-sans">
           {model.displayName} API Pricing &amp; Cost Rules
         </h1>
-        <p className="text-sm leading-relaxed text-slate-600">
-          API Model ID: <code className="font-mono bg-slate-100 px-1.5 py-0.5 rounded">{model.apiModelId}</code> ·
+        <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          API Model ID: <code className="font-mono bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-slate-200 px-1.5 py-0.5 rounded">{model.apiModelId}</code> ·
           Context Window:{" "}
-          <strong>
+          <strong className="text-slate-900 dark:text-white">
             {model.contextWindowTokens.toLocaleString("en-US")} tokens
           </strong>{" "}
           {model.maxInputTokens
             ? `(Max Input: ${model.maxInputTokens.toLocaleString("en-US")})`
             : ""}{" "}
           · Max Output:{" "}
-          <strong>{model.maxOutputTokens.toLocaleString("en-US")} tokens</strong>
+          <strong className="text-slate-900 dark:text-white">{model.maxOutputTokens.toLocaleString("en-US")} tokens</strong>
         </p>
       </header>
 
       {model.promotionalExpiryDate && (
-        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs leading-relaxed text-amber-950">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs leading-relaxed text-amber-800 dark:text-amber-300">
           <strong>Promotional Rate Alert:</strong> Current pricing expires on{" "}
           <span className="font-mono font-bold">
             {model.promotionalExpiryDate}
@@ -261,41 +261,41 @@ export default async function ModelDetailPage({
       )}
 
       {/* Rate Card Table */}
-      <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
-        <h2 className="text-base font-bold text-slate-900">
+      <section className="space-y-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-6 shadow-xs">
+        <h2 className="text-base font-bold text-slate-900 dark:text-white">
           Context Tiers &amp; Token Rate Card (USD per 1M Tokens)
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider">
-                <th className="py-2 pr-3">Tier</th>
-                <th className="py-2 pr-3 text-right">Std Input</th>
-                <th className="py-2 pr-3 text-right">Std Output</th>
-                <th className="py-2 pr-3 text-right">Cache Read</th>
-                <th className="py-2 pr-3 text-right">Write (Short)</th>
-                <th className="py-2 text-right">Write (Long)</th>
+              <tr className="border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[11px]">
+                <th className="py-2.5 pr-3">Tier</th>
+                <th className="py-2.5 pr-3 text-right">Std Input</th>
+                <th className="py-2.5 pr-3 text-right">Std Output</th>
+                <th className="py-2.5 pr-3 text-right">Cache Read</th>
+                <th className="py-2.5 pr-3 text-right">Write (Short)</th>
+                <th className="py-2.5 text-right">Write (Long)</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-mono tabular-nums">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-mono tabular-nums">
               {model.pricingTiers.map((tier, idx) => (
-                <tr key={idx}>
-                  <td className="py-2.5 pr-3 font-sans font-semibold text-slate-900">
+                <tr key={idx} className="hover:bg-slate-50/70 dark:hover:bg-white/[0.02]">
+                  <td className="py-3 pr-3 font-sans font-semibold text-slate-900 dark:text-white">
                     {tier.label}
                   </td>
-                  <td className="py-2.5 pr-3 text-right">
+                  <td className="py-3 pr-3 text-right text-slate-700 dark:text-slate-300">
                     {fmtRate(tier.inputPer1M)}
                   </td>
-                  <td className="py-2.5 pr-3 text-right">
+                  <td className="py-3 pr-3 text-right text-slate-700 dark:text-slate-300">
                     {fmtRate(tier.outputPer1M)}
                   </td>
-                  <td className="py-2.5 pr-3 text-right font-bold text-emerald-700">
+                  <td className="py-3 pr-3 text-right font-bold text-emerald-600 dark:text-emerald-400">
                     {fmtRate(tier.cachedInputReadPer1M)}
                   </td>
-                  <td className="py-2.5 pr-3 text-right text-slate-600">
+                  <td className="py-3 pr-3 text-right text-slate-500 dark:text-slate-400">
                     {fmtRate(tier.cacheWrite5mPer1M ?? tier.cacheWrite30mPer1M)}
                   </td>
-                  <td className="py-2.5 text-right text-slate-600">
+                  <td className="py-3 text-right text-slate-500 dark:text-slate-400">
                     {fmtRate(tier.cacheWrite1hPer1M ?? tier.cacheWrite12hPer1M)}
                   </td>
                 </tr>
@@ -304,7 +304,7 @@ export default async function ModelDetailPage({
           </table>
         </div>
         {model.pricingTiers[0]?.offPeakRates && (
-          <p className="text-[11px] text-emerald-800 bg-emerald-50 rounded-lg p-2.5">
+          <p className="text-[11px] text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3">
             <strong>Off-Peak Discount Available:</strong>{" "}
             {model.pricingTiers[0].offPeakRates.windowDescriptionUtc} — Standard
             Input:{" "}
@@ -326,72 +326,72 @@ export default async function ModelDetailPage({
 
       {/* Caching and Batch Rules Cards */}
       <section className="grid gap-6 md:grid-cols-2">
-        <div className="space-y-2 rounded-2xl border border-slate-200 bg-white p-6 text-xs leading-relaxed text-slate-700 shadow-xs">
-          <h2 className="text-base font-bold text-slate-900">
+        <div className="space-y-2 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-6 text-xs leading-relaxed text-slate-700 dark:text-slate-300 shadow-xs">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">
             Prompt Caching Rules
           </h2>
           <p>
-            <strong>Supported:</strong>{" "}
+            <strong className="text-slate-900 dark:text-slate-100">Supported:</strong>{" "}
             {model.promptCaching.supported ? "Yes" : "No"} (
             {model.promptCaching.mode})
           </p>
           <p>
-            <strong>Minimum Cacheable Prefix:</strong>{" "}
+            <strong className="text-slate-900 dark:text-slate-100">Minimum Cacheable Prefix:</strong>{" "}
             {model.promptCaching.minCacheableTokens != null
               ? `${model.promptCaching.minCacheableTokens.toLocaleString("en-US")} tokens`
               : "None / Automatic"}
           </p>
           <p>
-            <strong>Hourly Cache Storage:</strong>{" "}
+            <strong className="text-slate-900 dark:text-slate-100">Hourly Cache Storage:</strong>{" "}
             {model.promptCaching.storagePer1MPerHour != null
               ? `$${model.promptCaching.storagePer1MPerHour.toFixed(2)} / 1M tokens / hr`
               : "$0"}
           </p>
-          <p className="pt-1 text-slate-600">{model.promptCaching.notes}</p>
+          <p className="pt-1 text-slate-500 dark:text-slate-400">{model.promptCaching.notes}</p>
         </div>
 
-        <div className="space-y-2 rounded-2xl border border-slate-200 bg-white p-6 text-xs leading-relaxed text-slate-700 shadow-xs">
-          <h2 className="text-base font-bold text-slate-900">
+        <div className="space-y-2 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-6 text-xs leading-relaxed text-slate-700 dark:text-slate-300 shadow-xs">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">
             Batch API &amp; Hosting Notes
           </h2>
           <p>
-            <strong>Batch Supported:</strong>{" "}
+            <strong className="text-slate-900 dark:text-slate-100">Batch Supported:</strong>{" "}
             {model.batchApi.supported
               ? `Yes (${model.batchApi.discountPercent ?? 0}% discount · ${model.batchApi.turnaroundWindow ?? "Async"})`
               : "No"}
           </p>
           <p>
-            <strong>Caching in Batch:</strong>{" "}
+            <strong className="text-slate-900 dark:text-slate-100">Caching in Batch:</strong>{" "}
             {!model.batchApi.cachingAllowedInBatch
               ? "Disabled in Batch mode"
               : model.batchApi.batchDiscountAppliesToCache
                 ? "Allowed + Batch discount stacks onto cache reads"
                 : "Allowed at standard cache rates (no batch discount on cache)"}
           </p>
-          <p className="pt-1 text-slate-600">{model.batchApi.notes}</p>
-          <p className="pt-1 text-slate-600">{model.hosting.hostingNotes}</p>
+          <p className="pt-1 text-slate-500 dark:text-slate-400">{model.batchApi.notes}</p>
+          <p className="pt-1 text-slate-500 dark:text-slate-400">{model.hosting.hostingNotes}</p>
         </div>
       </section>
 
       {/* Frequently Asked Questions (FAQ) Section */}
-      <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
+      <section className="space-y-4 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-6 shadow-xs">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
             Frequently Asked Questions: {model.displayName} Costs
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Authoritative answers on prompt caching break-even, Batch API
             discounts, and reasoning token billing.
           </p>
         </div>
 
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-slate-100 dark:divide-white/5">
           {faqs.map((faq, idx) => (
             <div key={idx} className="py-4 space-y-1.5 first:pt-2 last:pb-0">
-              <h3 className="text-sm font-semibold text-slate-900">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
                 {faq.question}
               </h3>
-              <p className="text-xs leading-relaxed text-slate-600">
+              <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
                 {faq.answer}
               </p>
             </div>
@@ -400,25 +400,25 @@ export default async function ModelDetailPage({
       </section>
 
       {/* Actions & Links */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 text-xs shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-4 text-xs shadow-xs">
         <a
           href={model.officialSourceUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-semibold text-emerald-700 underline hover:text-emerald-900"
+          className="font-semibold text-emerald-600 dark:text-emerald-400 underline hover:text-emerald-500 transition-colors"
         >
           Verify live rate card on official documentation ↗
         </a>
         <div className="flex items-center gap-2">
           <Link
             href="/models/"
-            className="rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-700 hover:bg-slate-50"
+            className="rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161F30] px-3 py-2 font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/10 transition-colors"
           >
             ← All Models
           </Link>
           <Link
             href="/"
-            className="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white hover:bg-slate-800"
+            className="rounded-lg bg-slate-900 dark:bg-white px-4 py-2 font-semibold text-white dark:text-slate-900 hover:bg-slate-800 transition-colors"
           >
             Simulate {model.displayName} in Calculator →
           </Link>

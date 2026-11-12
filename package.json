@@ -13,6 +13,7 @@
     "validate:registry": "tsx scripts/validate-registry.ts"
   },
   "dependencies": {
+    "lucide-react": "^1.72.0",
     "next": "^16.4.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

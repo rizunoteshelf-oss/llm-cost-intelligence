@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { ArrowRight, Search, Sparkles } from "lucide-react";
 import type { PricingModel } from "@/lib/pricing/schema";
 
 interface ModelsDirectoryProps {
@@ -65,12 +66,13 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
       {/* Search and Filters */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by model name, API ID, or provider..."
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 shadow-xs focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            className="w-full rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161F30] pl-10 pr-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 shadow-xs focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 transition-colors"
           />
         </div>
 
@@ -89,8 +91,8 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
                 onClick={() => setSelectedProvider(p)}
                 className={`cursor-pointer rounded-lg px-3 py-1.5 font-medium transition-colors ${
                   active
-                    ? "bg-slate-900 text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
+                    ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900"
+                    : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 {label}
@@ -103,7 +105,7 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
             className={`cursor-pointer rounded-lg px-3 py-1.5 font-medium transition-colors ${
               selectedProvider === "open-weight"
                 ? "bg-indigo-600 text-white"
-                : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                : "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20"
             }`}
           >
             Open Weights
@@ -111,7 +113,7 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
         </div>
       </div>
 
-      <div className="text-xs text-slate-500">
+      <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">
         Showing <strong>{filteredModels.length}</strong> of{" "}
         <strong>{models.length}</strong> production models
       </div>
@@ -125,84 +127,87 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
           return (
             <div
               key={model.id}
-              className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-shadow hover:shadow-md"
+              className="flex flex-col justify-between rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-5 shadow-xs transition-all hover:border-slate-300 dark:hover:border-white/20 hover:shadow-md"
             >
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 <div className="flex items-start justify-between gap-2">
                   <div className="space-y-1">
-                    <span className="inline-block rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700 uppercase tracking-wider">
-                      {model.provider}
-                    </span>
-                    {model.openWeight && (
-                      <span className="ml-1.5 inline-block rounded-md bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700">
-                        Open-Weight
+                    <div className="flex items-center gap-1.5">
+                      <span className="inline-block rounded-md bg-slate-100 dark:bg-white/10 px-2 py-0.5 text-[10px] font-mono font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                        {model.provider}
                       </span>
-                    )}
-                    <h2 className="text-base font-bold text-slate-900 leading-snug">
+                      {model.openWeight && (
+                        <span className="inline-block rounded-md bg-indigo-500/10 px-2 py-0.5 text-[10px] font-mono font-semibold text-indigo-600 dark:text-indigo-400">
+                          Open-Weight
+                        </span>
+                      )}
+                    </div>
+                    <h2 className="text-base font-bold text-slate-900 dark:text-white leading-snug">
                       <Link
                         href={`/models/${model.slug}/`}
-                        className="hover:text-emerald-700"
+                        className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
                       >
                         {model.displayName}
                       </Link>
                     </h2>
-                    <p className="font-mono text-xs text-slate-500">
+                    <p className="font-mono text-xs text-slate-400 dark:text-slate-500">
                       {model.apiModelId}
                     </p>
                   </div>
 
-                  <span className="shrink-0 rounded-full bg-slate-900/5 px-2.5 py-1 text-right text-xs font-semibold text-slate-800">
+                  <span className="shrink-0 rounded-full border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-2.5 py-1 text-right font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                     {fmtTokens(model.contextWindowTokens)} ctx
                   </span>
                 </div>
 
-                <div className="rounded-xl bg-slate-50 p-3 space-y-1.5 text-xs">
-                  <div className="flex justify-between items-center text-slate-600">
-                    <span>Input (Standard):</span>
-                    <span className="font-mono font-bold text-slate-900">
+                <div className="rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-[#161F30] p-3 space-y-1.5 text-xs font-mono">
+                  <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
+                    <span className="font-sans">Input (Standard):</span>
+                    <span className="font-bold text-slate-900 dark:text-white tabular-nums">
                       {fmtRate(primaryTier?.inputPer1M)} / 1M
                       {hasTiers ? " *" : ""}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-slate-600">
-                    <span>Output:</span>
-                    <span className="font-mono font-bold text-slate-900">
+                  <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
+                    <span className="font-sans">Output:</span>
+                    <span className="font-bold text-slate-900 dark:text-white tabular-nums">
                       {fmtRate(primaryTier?.outputPer1M)} / 1M
                       {hasTiers ? " *" : ""}
                     </span>
                   </div>
                   {primaryTier?.cachedInputReadPer1M != null && (
-                    <div className="flex justify-between items-center text-emerald-800">
-                      <span>Cached Read:</span>
-                      <span className="font-mono font-bold text-emerald-700">
+                    <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400">
+                      <span className="font-sans">Cached Read:</span>
+                      <span className="font-bold tabular-nums">
                         {fmtRate(primaryTier.cachedInputReadPer1M)} / 1M
                       </span>
                     </div>
                   )}
                   {model.batchApi.supported && (
-                    <div className="flex justify-between items-center text-slate-600">
-                      <span>Batch API:</span>
-                      <span className="font-semibold text-indigo-700">
-                        {model.batchApi.discountPercent}% Off ({model.batchApi.turnaroundWindow ?? "24h"})
+                    <div className="flex justify-between items-center text-cyan-600 dark:text-cyan-400">
+                      <span className="font-sans">Batch API:</span>
+                      <span className="font-semibold tabular-nums">
+                        -{model.batchApi.discountPercent}% ({model.batchApi.turnaroundWindow ?? "24h"})
                       </span>
                     </div>
                   )}
                 </div>
 
-                <p className="text-xs text-slate-500 line-clamp-2">
+                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
                   {model.notes}
                 </p>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span className="text-slate-400">
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs">
+                <span className="text-slate-400 dark:text-slate-500 font-mono text-[11px]">
                   Host: {model.hosting.endpointProvider}
                 </span>
                 <Link
                   href={`/models/${model.slug}/`}
-                  className="font-semibold text-emerald-700 hover:text-emerald-900 flex items-center gap-1"
+                  className="inline-flex items-center gap-1 font-semibold text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 transition-colors"
                 >
-                  Rate Card &amp; Rules →
+                  <span>Rate Card &amp; Rules</span>
+                  <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>
             </div>
@@ -211,11 +216,11 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
       </div>
 
       {filteredModels.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-slate-300 p-12 text-center">
-          <p className="text-sm font-semibold text-slate-700">
+        <div className="rounded-2xl border border-dashed border-slate-300 dark:border-white/20 p-12 text-center">
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
             No models match &ldquo;{query}&rdquo;
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             Try searching for another model name, provider, or clear your filters.
           </p>
           <button
@@ -224,7 +229,7 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
               setQuery("");
               setSelectedProvider("all");
             }}
-            className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+            className="mt-4 rounded-lg bg-slate-900 dark:bg-white px-4 py-2 text-xs font-semibold text-white dark:text-slate-900 hover:bg-slate-800"
           >
             Reset Filters
           </button>

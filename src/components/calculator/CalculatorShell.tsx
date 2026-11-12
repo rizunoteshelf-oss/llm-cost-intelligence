@@ -13,9 +13,13 @@ import {
   type WorkloadPresetId,
 } from "@/lib/pricing/presets";
 import type { PricingModel, ProviderId } from "@/lib/pricing/schema";
+import { buildEstimatesCsv } from "@/lib/export/csv";
+import { buildEstimatesMarkdown } from "@/lib/export/markdown";
 import { ComparisonTable } from "./ComparisonTable";
-import { ExportActions } from "./ExportActions";
+import { FormattedNumberInput } from "./FormattedNumberInput";
+import { LiveSpendLeaderboard } from "./LiveSpendLeaderboard";
 import { PresetBar } from "./PresetBar";
+import { PricingModifierPills } from "./PricingModifierPills";
 import { PrintQuoteView } from "./PrintQuoteView";
 import { TokenEstimatorDrawer } from "./TokenEstimatorDrawer";
 
@@ -54,6 +58,13 @@ function parseIntParam(
   if (!Number.isFinite(n)) return undefined;
   return Math.min(max, Math.max(min, Math.round(n)));
 }
+
+const QUICK_REQUEST_CHIPS = [
+  { label: "1K", value: 1_000 },
+  { label: "10K", value: 10_000 },
+  { label: "100K", value: 100_000 },
+  { label: "1M", value: 1_000_000 },
+] as const;
 
 export function CalculatorShell({
   models,
@@ -99,9 +110,10 @@ export function CalculatorShell({
   );
   const [weightFilter, setWeightFilter] = useState<WeightFilter>("all");
   const [sortBy, setSortBy] = useState<SortKey>("monthly");
+  const [isCopied, setIsCopied] = useState(false);
   const hasInteractedRef = useRef(false);
 
-  // Hydrate optional shareable query params on client mount (avoids SSR/static hydration mismatch)
+  // Hydrate query params on mount
   useEffect(() => {
     if (!window.location.search || window.location.search.length <= 1) {
       return;
@@ -203,7 +215,7 @@ export function CalculatorShell({
     };
   }, []);
 
-  // Sync state to URL query parameters only after user interaction
+  // Sync state to URL params on user interaction
   useEffect(() => {
     if (!hasInteractedRef.current) return;
     const params = new URLSearchParams();
@@ -338,457 +350,562 @@ export function CalculatorShell({
       }
       return a.monthlyCostUsd - b.monthlyCostUsd;
     });
-  }, [models, providerFilter, weightFilter, calculatorInput, useUsResidency, sortBy]);
+  }, [
+    models,
+    providerFilter,
+    weightFilter,
+    calculatorInput,
+    useUsResidency,
+    sortBy,
+  ]);
 
   const presetLabel =
     activePresetId === "custom"
       ? "Custom Workload"
       : PRESET_BY_ID[activePresetId].name;
 
-  const sampleAvgTurnTokens = estimates[0]?.avgInputTokensPerTurn ?? prefixTokens + dynamicInputTokens;
+  const sampleAvgTurnTokens =
+    estimates[0]?.avgInputTokensPerTurn ?? prefixTokens + dynamicInputTokens;
+
+  function handleCopyShareableUrl() {
+    const params = new URLSearchParams();
+    if (activePresetId !== "custom") {
+      params.set("preset", activePresetId);
+    }
+    params.set("prefix", String(prefixTokens));
+    params.set("dyn", String(dynamicInputTokens));
+    params.set("out", String(outputTokens));
+    params.set("req", String(requestsPerDay));
+    params.set("hit", String(cacheHitRatePct));
+    params.set("writes", String(cacheWritesPerHour));
+    params.set("ttl", cacheTtl);
+    params.set("cache", useCaching ? "1" : "0");
+    params.set("batch", useBatch ? "1" : "0");
+    params.set("turns", String(turnsPerSession));
+    if (turnsPerSession > 1) {
+      params.set("follow", String(followUpUserTokens));
+    }
+    if (useOffPeak) params.set("offpeak", "1");
+    if (useUsResidency) params.set("us", "1");
+
+    const fullUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2500);
+    });
+  }
+
+  function handleExportCsv() {
+    const nowIso = new Date().toISOString();
+    const csv = buildEstimatesCsv(estimates, calculatorInput, {
+      presetLabel,
+      registryUpdatedAt,
+      exportedAtIso: nowIso,
+    });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `llm-cost-quote-${nowIso.slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function handleExportMarkdown() {
+    const nowIso = new Date().toISOString();
+    const md = buildEstimatesMarkdown(estimates, calculatorInput, {
+      presetLabel,
+      registryUpdatedAt,
+      exportedAtIso: nowIso,
+    });
+    const blob = new Blob([md], { type: "text/markdown;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `llm-cost-quote-${nowIso.slice(0, 10)}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function handlePrintPdf() {
+    window.print();
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="no-print space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <PresetBar
-          activePresetId={activePresetId}
-          onSelectPreset={handleSelectPreset}
-        />
+    <div className="space-y-8">
+      {/* Above-The-Fold Split-Screen Dashboard (Desktop >= 1280px / lg:grid) */}
+      <div className="no-print lg:grid lg:grid-cols-12 lg:gap-8 items-start">
+        {/* Left Column (55% width ~ col-span-7): Controls & Ergonomics */}
+        <div className="space-y-6 lg:col-span-7">
+          <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-5 shadow-sm sm:p-6 transition-colors space-y-6">
+            <PresetBar
+              activePresetId={activePresetId}
+              onSelectPreset={handleSelectPreset}
+            />
 
-        <div className="grid gap-5 border-t border-slate-100 pt-5 md:grid-cols-2 lg:grid-cols-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <label
-                htmlFor="input-prefix-tokens"
-                className="font-semibold text-slate-700"
-              >
-                Cacheable Prefix Tokens
-              </label>
-              <span className="font-mono font-bold text-slate-900 tabular-nums">
-                {prefixTokens.toLocaleString("en-US")}
-              </span>
-            </div>
-            <input
-              id="input-prefix-tokens"
-              type="range"
-              min={0}
-              max={100000}
-              step={100}
-              value={Math.min(100000, prefixTokens)}
-              onChange={(e) =>
-                markCustom(setPrefixTokens)(Number(e.target.value))
-              }
-              className="w-full accent-emerald-600"
-            />
-            <input
-              type="number"
-              aria-label="Exact cacheable prefix tokens"
-              min={0}
-              max={1000000}
-              value={prefixTokens}
-              onChange={(e) =>
-                markCustom(setPrefixTokens)(Math.max(0, Number(e.target.value) || 0))
-              }
-              className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 font-mono text-xs tabular-nums focus:border-emerald-600 focus:outline-none"
-            />
-          </div>
+            {/* Core Token Parameter Grid */}
+            <div className="border-t border-slate-100 dark:border-white/5 pt-5 space-y-5">
+              <div className="flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-mono text-[11px] font-bold">
+                  2
+                </span>
+                <span className="text-xs font-semibold tracking-wider text-slate-700 dark:text-slate-300 uppercase">
+                  Token Dimensions &amp; Scale
+                </span>
+              </div>
 
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <label
-                htmlFor="input-dynamic-tokens"
-                className="font-semibold text-slate-700"
-              >
-                {turnsPerSession > 1
-                  ? "Turn 1 User Query Tokens"
-                  : "Uncached Dynamic Input"}
-              </label>
-              <span className="font-mono font-bold text-slate-900 tabular-nums">
-                {dynamicInputTokens.toLocaleString("en-US")}
-              </span>
-            </div>
-            <input
-              id="input-dynamic-tokens"
-              type="range"
-              min={0}
-              max={350000}
-              step={250}
-              value={Math.min(350000, dynamicInputTokens)}
-              onChange={(e) =>
-                markCustom(setDynamicInputTokens)(Number(e.target.value))
-              }
-              className="w-full accent-emerald-600"
-            />
-            <input
-              type="number"
-              aria-label="Exact dynamic input tokens"
-              min={0}
-              max={1048576}
-              value={dynamicInputTokens}
-              onChange={(e) =>
-                markCustom(setDynamicInputTokens)(
-                  Math.max(0, Number(e.target.value) || 0),
-                )
-              }
-              className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 font-mono text-xs tabular-nums focus:border-emerald-600 focus:outline-none"
-            />
-          </div>
+              <div className="grid gap-5 sm:grid-cols-2">
+                {/* Prefix Tokens */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <label
+                      htmlFor="input-prefix-tokens"
+                      className="font-semibold text-slate-700 dark:text-slate-300"
+                    >
+                      Cacheable Prefix Tokens
+                    </label>
+                    <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                      {prefixTokens.toLocaleString("en-US")}
+                    </span>
+                  </div>
+                  <input
+                    id="input-prefix-tokens"
+                    type="range"
+                    min={0}
+                    max={100000}
+                    step={100}
+                    value={Math.min(100000, prefixTokens)}
+                    onChange={(e) =>
+                      markCustom(setPrefixTokens)(Number(e.target.value))
+                    }
+                    className="w-full accent-emerald-500"
+                  />
+                  <FormattedNumberInput
+                    aria-label="Exact cacheable prefix tokens"
+                    min={0}
+                    max={1000000}
+                    value={prefixTokens}
+                    onChange={(val) => markCustom(setPrefixTokens)(val)}
+                    className="w-full"
+                  />
+                </div>
 
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <label
-                htmlFor="input-output-tokens"
-                className="font-semibold text-slate-700"
-              >
-                Output Tokens / Turn
-              </label>
-              <span className="font-mono font-bold text-slate-900 tabular-nums">
-                {outputTokens.toLocaleString("en-US")}
-              </span>
-            </div>
-            <input
-              id="input-output-tokens"
-              type="range"
-              min={50}
-              max={32000}
-              step={50}
-              value={Math.min(32000, outputTokens)}
-              onChange={(e) =>
-                markCustom(setOutputTokens)(Number(e.target.value))
-              }
-              className="w-full accent-emerald-600"
-            />
-            <input
-              type="number"
-              aria-label="Exact output tokens"
-              min={1}
-              max={393216}
-              value={outputTokens}
-              onChange={(e) =>
-                markCustom(setOutputTokens)(
-                  Math.max(1, Number(e.target.value) || 1),
-                )
-              }
-              className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 font-mono text-xs tabular-nums focus:border-emerald-600 focus:outline-none"
-            />
-          </div>
+                {/* Dynamic Input Tokens */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <label
+                      htmlFor="input-dynamic-tokens"
+                      className="font-semibold text-slate-700 dark:text-slate-300"
+                    >
+                      {turnsPerSession > 1
+                        ? "Turn 1 User Query Tokens"
+                        : "Uncached Dynamic Input"}
+                    </label>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white tabular-nums">
+                      {dynamicInputTokens.toLocaleString("en-US")}
+                    </span>
+                  </div>
+                  <input
+                    id="input-dynamic-tokens"
+                    type="range"
+                    min={0}
+                    max={350000}
+                    step={250}
+                    value={Math.min(350000, dynamicInputTokens)}
+                    onChange={(e) =>
+                      markCustom(setDynamicInputTokens)(Number(e.target.value))
+                    }
+                    className="w-full accent-emerald-500"
+                  />
+                  <FormattedNumberInput
+                    aria-label="Exact dynamic input tokens"
+                    min={0}
+                    max={1048576}
+                    value={dynamicInputTokens}
+                    onChange={(val) => markCustom(setDynamicInputTokens)(val)}
+                    className="w-full"
+                  />
+                </div>
 
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <label
-                htmlFor="input-requests-day"
-                className="font-semibold text-slate-700"
-              >
-                {turnsPerSession > 1 ? "Sessions / Day" : "Requests / Day"}
-              </label>
-              <span className="font-mono font-bold text-slate-900 tabular-nums">
-                {requestsPerDay.toLocaleString("en-US")}
-              </span>
+                {/* Output Tokens / Turn */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <label
+                      htmlFor="input-output-tokens"
+                      className="font-semibold text-slate-700 dark:text-slate-300"
+                    >
+                      Output Tokens / Turn
+                    </label>
+                    <span className="font-mono font-bold text-cyan-600 dark:text-cyan-400 tabular-nums">
+                      {outputTokens.toLocaleString("en-US")}
+                    </span>
+                  </div>
+                  <input
+                    id="input-output-tokens"
+                    type="range"
+                    min={50}
+                    max={32000}
+                    step={50}
+                    value={Math.min(32000, outputTokens)}
+                    onChange={(e) =>
+                      markCustom(setOutputTokens)(Number(e.target.value))
+                    }
+                    className="w-full accent-emerald-500"
+                  />
+                  <FormattedNumberInput
+                    aria-label="Exact output tokens"
+                    min={1}
+                    max={393216}
+                    value={outputTokens}
+                    onChange={(val) => markCustom(setOutputTokens)(val)}
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Requests / Day with Quick Chips */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <label
+                      htmlFor="input-requests-day"
+                      className="font-semibold text-slate-700 dark:text-slate-300"
+                    >
+                      {turnsPerSession > 1 ? "Sessions / Day" : "Requests / Day"}
+                    </label>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white tabular-nums">
+                      {requestsPerDay.toLocaleString("en-US")}
+                    </span>
+                  </div>
+                  <input
+                    id="input-requests-day"
+                    type="range"
+                    min={10}
+                    max={50000}
+                    step={50}
+                    value={Math.min(50000, requestsPerDay)}
+                    onChange={(e) =>
+                      markCustom(setRequestsPerDay)(Number(e.target.value))
+                    }
+                    className="w-full accent-emerald-500"
+                  />
+                  <div className="flex items-center gap-2">
+                    <FormattedNumberInput
+                      aria-label="Exact requests or sessions per day"
+                      min={1}
+                      max={10000000}
+                      value={requestsPerDay}
+                      onChange={(val) => markCustom(setRequestsPerDay)(val)}
+                      className="flex-1"
+                    />
+                    {/* Log Scale Quick-Select Chips */}
+                    <div className="flex items-center gap-1">
+                      {QUICK_REQUEST_CHIPS.map((chip) => (
+                        <button
+                          key={chip.label}
+                          type="button"
+                          onClick={() => markCustom(setRequestsPerDay)(chip.value)}
+                          className={`rounded px-1.5 py-1 font-mono text-[10px] font-bold transition-colors ${
+                            requestsPerDay === chip.value
+                              ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+                              : "border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10"
+                          }`}
+                        >
+                          {chip.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <input
-              id="input-requests-day"
-              type="range"
-              min={10}
-              max={50000}
-              step={50}
-              value={Math.min(50000, requestsPerDay)}
-              onChange={(e) =>
-                markCustom(setRequestsPerDay)(Number(e.target.value))
-              }
-              className="w-full accent-emerald-600"
-            />
-            <input
-              type="number"
-              aria-label="Exact requests or sessions per day"
-              min={1}
-              max={10000000}
-              value={requestsPerDay}
-              onChange={(e) =>
-                markCustom(setRequestsPerDay)(
-                  Math.max(1, Number(e.target.value) || 1),
-                )
-              }
-              className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 font-mono text-xs tabular-nums focus:border-emerald-600 focus:outline-none"
+
+            {/* Logical Sub-Group 1: Caching & Session Dynamics */}
+            <div className="border-t border-slate-100 dark:border-white/5 pt-5 space-y-4">
+              <div className="flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 font-mono text-[11px] font-bold">
+                  3
+                </span>
+                <span className="text-xs font-semibold tracking-wider text-slate-700 dark:text-slate-300 uppercase">
+                  Caching &amp; Session Dynamics
+                </span>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {/* Cache Hit Rate */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <label
+                      htmlFor="input-cache-hit"
+                      className="font-medium text-slate-700 dark:text-slate-300"
+                    >
+                      Cache Hit Rate (%)
+                    </label>
+                    <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                      {cacheHitRatePct}%
+                    </span>
+                  </div>
+                  <input
+                    id="input-cache-hit"
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={1}
+                    disabled={!useCaching}
+                    value={cacheHitRatePct}
+                    onChange={(e) =>
+                      markCustom(setCacheHitRatePct)(Number(e.target.value))
+                    }
+                    className="w-full accent-emerald-500 disabled:opacity-40"
+                  />
+                </div>
+
+                {/* Cache Writes / Hr & TTL */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label
+                      htmlFor="input-writes-hr"
+                      className="block text-[11px] font-medium text-slate-700 dark:text-slate-300"
+                    >
+                      Writes / Hr
+                    </label>
+                    <FormattedNumberInput
+                      id="input-writes-hr"
+                      aria-label="Cache writes per hour"
+                      min={0}
+                      max={1000}
+                      disabled={!useCaching}
+                      value={cacheWritesPerHour}
+                      onChange={(val) =>
+                        markCustom(setCacheWritesPerHour)(val)
+                      }
+                      className="mt-1 w-full"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="select-ttl"
+                      className="block text-[11px] font-medium text-slate-700 dark:text-slate-300"
+                    >
+                      Write TTL
+                    </label>
+                    <select
+                      id="select-ttl"
+                      disabled={!useCaching}
+                      value={cacheTtl}
+                      onChange={(e) =>
+                        markCustom(setCacheTtl)(e.target.value as "5m" | "1h")
+                      }
+                      className="mt-1 w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161F30] px-2 py-1.5 font-mono text-xs text-slate-900 dark:text-slate-100 disabled:opacity-40 focus:border-emerald-500 focus:outline-none"
+                    >
+                      <option value="5m">5m / 30m</option>
+                      <option value="1h">1h / 12h</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Multi-turn controls */}
+                <div className="grid grid-cols-2 gap-2 sm:col-span-2 lg:col-span-1">
+                  <div>
+                    <label
+                      htmlFor="input-turns"
+                      className="block text-[11px] font-medium text-slate-700 dark:text-slate-300"
+                    >
+                      Turns / Session
+                    </label>
+                    <FormattedNumberInput
+                      id="input-turns"
+                      aria-label="Turns per session"
+                      min={1}
+                      max={30}
+                      value={turnsPerSession}
+                      onChange={(val) => markCustom(setTurnsPerSession)(val)}
+                      className="mt-1 w-full"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="input-followup"
+                      className="block text-[11px] font-medium text-slate-700 dark:text-slate-300"
+                    >
+                      Follow-Up User Tok
+                    </label>
+                    <FormattedNumberInput
+                      id="input-followup"
+                      aria-label="Follow up user tokens"
+                      min={0}
+                      max={50000}
+                      disabled={turnsPerSession <= 1}
+                      value={followUpUserTokens}
+                      onChange={(val) =>
+                        markCustom(setFollowUpUserTokens)(val)
+                      }
+                      className="mt-1 w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Logical Sub-Group 2: Pricing Modifiers Pills */}
+            <div className="border-t border-slate-100 dark:border-white/5 pt-5">
+              <PricingModifierPills
+                useCaching={useCaching}
+                onToggleCaching={markCustom(setUseCaching)}
+                useBatch={useBatch}
+                onToggleBatch={markCustom(setUseBatch)}
+                useOffPeak={useOffPeak}
+                onToggleOffPeak={(v) => {
+                  hasInteractedRef.current = true;
+                  setUseOffPeak(v);
+                }}
+                useUsResidency={useUsResidency}
+                onToggleUsResidency={(v) => {
+                  hasInteractedRef.current = true;
+                  setUseUsResidency(v);
+                }}
+              />
+            </div>
+
+            {/* Elevated Client-Side Tokenizer Drawer */}
+            <TokenEstimatorDrawer
+              onApplyToPrefix={(t) => markCustom(setPrefixTokens)(t)}
+              onApplyToDynamic={(t) => markCustom(setDynamicInputTokens)(t)}
             />
           </div>
         </div>
 
-        <div className="grid gap-4 border-t border-slate-100 pt-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <label
-                htmlFor="input-cache-hit"
-                className="font-semibold text-slate-700"
-              >
-                Cache Hit Rate (%)
-              </label>
-              <span className="font-mono font-bold text-slate-900 tabular-nums">
-                {cacheHitRatePct}%
-              </span>
-            </div>
-            <input
-              id="input-cache-hit"
-              type="range"
-              min={0}
-              max={100}
-              step={1}
-              disabled={!useCaching}
-              value={cacheHitRatePct}
-              onChange={(e) =>
-                markCustom(setCacheHitRatePct)(Number(e.target.value))
-              }
-              className="w-full accent-emerald-600 disabled:opacity-40"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label
-                htmlFor="input-writes-hr"
-                className="block text-[11px] font-semibold text-slate-700"
-              >
-                Cache Writes / Hr
-              </label>
-              <input
-                id="input-writes-hr"
-                type="number"
-                min={0}
-                max={1000}
-                disabled={!useCaching}
-                value={cacheWritesPerHour}
-                onChange={(e) =>
-                  markCustom(setCacheWritesPerHour)(
-                    Math.max(0, Number(e.target.value) || 0),
-                  )
-                }
-                className="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 font-mono text-xs tabular-nums disabled:opacity-40"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="select-ttl"
-                className="block text-[11px] font-semibold text-slate-700"
-              >
-                Cache Write TTL
-              </label>
-              <select
-                id="select-ttl"
-                disabled={!useCaching}
-                value={cacheTtl}
-                onChange={(e) =>
-                  markCustom(setCacheTtl)(e.target.value as "5m" | "1h")
-                }
-                className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs disabled:opacity-40"
-              >
-                <option value="5m">Short (5m / 30m)</option>
-                <option value="1h">Extended (1h / 12h)</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label
-                htmlFor="input-turns"
-                className="block text-[11px] font-semibold text-slate-700"
-              >
-                Turns / Session
-              </label>
-              <input
-                id="input-turns"
-                type="number"
-                min={1}
-                max={30}
-                value={turnsPerSession}
-                onChange={(e) =>
-                  markCustom(setTurnsPerSession)(
-                    Math.max(1, Math.min(30, Number(e.target.value) || 1)),
-                  )
-                }
-                className="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 font-mono text-xs tabular-nums"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="input-followup"
-                className="block text-[11px] font-semibold text-slate-700"
-              >
-                Follow-Up User Tok
-              </label>
-              <input
-                id="input-followup"
-                type="number"
-                min={0}
-                max={50000}
-                disabled={turnsPerSession <= 1}
-                value={followUpUserTokens}
-                onChange={(e) =>
-                  markCustom(setFollowUpUserTokens)(
-                    Math.max(0, Number(e.target.value) || 0),
-                  )
-                }
-                className="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 font-mono text-xs tabular-nums disabled:opacity-40"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
-            <label className="inline-flex cursor-pointer items-center gap-1.5 font-medium text-slate-800">
-              <input
-                type="checkbox"
-                checked={useCaching}
-                onChange={(e) => markCustom(setUseCaching)(e.target.checked)}
-                className="h-4 w-4 rounded accent-emerald-600"
-              />
-              Prompt Caching
-            </label>
-
-            <label className="inline-flex cursor-pointer items-center gap-1.5 font-medium text-slate-800">
-              <input
-                type="checkbox"
-                checked={useBatch}
-                onChange={(e) => markCustom(setUseBatch)(e.target.checked)}
-                className="h-4 w-4 rounded accent-emerald-600"
-              />
-              Batch API (24h)
-            </label>
-
-            <label className="inline-flex cursor-pointer items-center gap-1.5 font-medium text-slate-800">
-              <input
-                type="checkbox"
-                checked={useOffPeak}
-                onChange={(e) => {
-                  hasInteractedRef.current = true;
-                  setUseOffPeak(e.target.checked);
-                }}
-                className="h-4 w-4 rounded accent-emerald-600"
-              />
-              DeepSeek Off-Peak
-            </label>
-
-            <label className="inline-flex cursor-pointer items-center gap-1.5 font-medium text-slate-800">
-              <input
-                type="checkbox"
-                checked={useUsResidency}
-                onChange={(e) => {
-                  hasInteractedRef.current = true;
-                  setUseUsResidency(e.target.checked);
-                }}
-                className="h-4 w-4 rounded accent-emerald-600"
-              />
-              US-Only Geo Uplift
-            </label>
-          </div>
+        {/* Right Column (45% width ~ col-span-5, sticky): Live Spend Leaderboard */}
+        <div className="mt-8 lg:mt-0 lg:col-span-5 lg:sticky lg:top-20 space-y-4">
+          <LiveSpendLeaderboard
+            estimates={estimates}
+            calculatorInput={calculatorInput}
+            presetLabel={presetLabel}
+            registryUpdatedAt={registryUpdatedAt}
+            onCopyShareableUrl={handleCopyShareableUrl}
+            isCopied={isCopied}
+            onExportCsv={handleExportCsv}
+            onExportMarkdown={handleExportMarkdown}
+            onPrintPdf={handlePrintPdf}
+          />
         </div>
-
-        <TokenEstimatorDrawer
-          onApplyToPrefix={(t) => markCustom(setPrefixTokens)(t)}
-          onApplyToDynamic={(t) => markCustom(setDynamicInputTokens)(t)}
-        />
       </div>
 
-      {/* Results Header, Filters, Disclaimers & Export */}
-      <div className="no-print space-y-3">
-        <div className="flex flex-col justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center">
+      {/* Full Comparison Table & Filter Controls Section */}
+      <div className="no-print space-y-4 pt-6">
+        <div className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-4 sm:flex-row sm:items-center transition-colors">
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-sm font-bold text-slate-900 sm:text-base">
-                {presetLabel} Cost Comparison ({estimates.length} models)
-              </h2>
-              <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
-                100% Client-Side · Zero Prompt Transmission
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                Complete Model Comparison Directory ({estimates.length} models)
+              </h3>
+              <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                100% Client-Side Engine
               </span>
             </div>
-            <p className="text-xs text-slate-600 tabular-nums">
-              Avg input/turn:{" "}
-              <strong>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono tabular-nums">
+              Avg turn input:{" "}
+              <strong className="text-slate-700 dark:text-slate-200">
                 {Math.round(sampleAvgTurnTokens).toLocaleString("en-US")} tok
               </strong>{" "}
               · Daily turns:{" "}
-              <strong>
+              <strong className="text-slate-700 dark:text-slate-200">
                 {(requestsPerDay * turnsPerSession).toLocaleString("en-US")}
               </strong>{" "}
-              · Registry verified:{" "}
-              <span className="font-mono">{registryUpdatedAt}</span>
+              · Reference: <span>{registryUpdatedAt}</span>
             </p>
           </div>
 
-          <ExportActions
-            estimates={estimates}
-            input={calculatorInput}
-            presetLabel={presetLabel}
-            registryUpdatedAt={registryUpdatedAt}
-          />
-        </div>
+          {/* Quick Filter Bar */}
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <div className="flex items-center gap-1.5">
+              <label
+                htmlFor="filter-provider"
+                className="font-medium text-slate-600 dark:text-slate-400"
+              >
+                Provider:
+              </label>
+              <select
+                id="filter-provider"
+                value={providerFilter}
+                onChange={(e) =>
+                  setProviderFilter(e.target.value as ProviderId | "all")
+                }
+                className="rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161F30] px-2.5 py-1 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
+              >
+                <option value="all">All 8 Providers</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="google">Google Gemini</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="mistral">Mistral</option>
+                <option value="groq">Groq</option>
+                <option value="together">Together AI</option>
+                <option value="bedrock">Amazon Bedrock</option>
+              </select>
+            </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs">
-          <div className="flex flex-wrap items-center gap-2">
-            <label htmlFor="filter-provider" className="font-semibold text-slate-600">
-              Provider:
-            </label>
-            <select
-              id="filter-provider"
-              value={providerFilter}
-              onChange={(e) =>
-                setProviderFilter(e.target.value as ProviderId | "all")
-              }
-              className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs"
-            >
-              <option value="all">All 8 Providers</option>
-              <option value="openai">OpenAI</option>
-              <option value="anthropic">Anthropic</option>
-              <option value="google">Google Gemini</option>
-              <option value="deepseek">DeepSeek</option>
-              <option value="mistral">Mistral</option>
-              <option value="groq">Groq</option>
-              <option value="together">Together AI</option>
-              <option value="bedrock">Amazon Bedrock</option>
-            </select>
+            <div className="flex items-center gap-1.5">
+              <label
+                htmlFor="filter-weight"
+                className="font-medium text-slate-600 dark:text-slate-400"
+              >
+                Type:
+              </label>
+              <select
+                id="filter-weight"
+                value={weightFilter}
+                onChange={(e) =>
+                  setWeightFilter(e.target.value as WeightFilter)
+                }
+                className="rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161F30] px-2.5 py-1 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
+              >
+                <option value="all">All Weights</option>
+                <option value="open">Open-Weight Only</option>
+                <option value="proprietary">Proprietary Only</option>
+              </select>
+            </div>
 
-            <label htmlFor="filter-weight" className="ml-2 font-semibold text-slate-600">
-              Model Type:
-            </label>
-            <select
-              id="filter-weight"
-              value={weightFilter}
-              onChange={(e) => setWeightFilter(e.target.value as WeightFilter)}
-              className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs"
-            >
-              <option value="all">All Models</option>
-              <option value="open">Open-Weight Only</option>
-              <option value="proprietary">Proprietary Only</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <label htmlFor="sort-by" className="font-semibold text-slate-600">
-              Sort by:
-            </label>
-            <select
-              id="sort-by"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortKey)}
-              className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs"
-            >
-              <option value="monthly">Monthly Cost (Low → High)</option>
-              <option value="per1k">Cost per 1K Turns</option>
-              <option value="savings">Highest Savings %</option>
-            </select>
+            <div className="flex items-center gap-1.5">
+              <label
+                htmlFor="sort-by"
+                className="font-medium text-slate-600 dark:text-slate-400"
+              >
+                Sort:
+              </label>
+              <select
+                id="sort-by"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortKey)}
+                className="rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161F30] px-2.5 py-1 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
+              >
+                <option value="monthly">Monthly Spend (Low → High)</option>
+                <option value="per1k">Cost per 1K Turns</option>
+                <option value="savings">Highest Savings %</option>
+              </select>
+            </div>
           </div>
         </div>
 
         <ComparisonTable estimates={estimates} />
 
-        <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[11px] leading-relaxed text-slate-600">
-          <strong>Budgeting &amp; Tokenizer Disclaimer:</strong> Estimates assume
-          USD list pricing verified on {registryUpdatedAt}. Actual token counts
-          vary across provider tokenizers (for example, Claude 4.7+ uses a newer
-          tokenizer that generates ~30% more tokens on identical prose than
-          legacy models), and reasoning models bill hidden thinking tokens as
-          output tokens.
-        </p>
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-[#111827] px-4 py-3.5 text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
+          <strong className="text-slate-800 dark:text-slate-200">
+            Institutional Tokenizer &amp; Pricing Note:
+          </strong>{" "}
+          Estimates reflect versioned USD list pricing verified on{" "}
+          <span className="font-mono text-emerald-600 dark:text-emerald-400">
+            {registryUpdatedAt}
+          </span>
+          . Actual token volumes vary by tokenizer architecture (for example,
+          Claude 4.7+ uses a modern byte-level vocabulary generating ~30% more
+          tokens on identical text than GPT-4o), and reasoning models (o1,
+          DeepSeek-R1) bill hidden thinking tokens as output tokens.
+        </div>
       </div>
 
       <PrintQuoteView

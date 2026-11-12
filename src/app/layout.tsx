@@ -20,7 +20,7 @@ export const metadata: Metadata = {
       "LLM API Pricing Calculator 2026 - Claude 3.5 Sonnet, GPT-4o, DeepSeek V3 & Gemini 2.0",
     template: "%s | LLM Cost Intelligence",
   },
-  description: `Free client-side LLM API pricing calculator modeling real-world prompt caching write/read break-even, Batch API discount stacking (up to 50% off), long-context cliffs, and multi-turn agent growth across ${registry.models.length} models and ${providerCount} providers.`,
+  description: `FinOps platform modeling real-world LLM API costs with prompt caching write/read break-even, Batch API discount stacking (up to 50% off), long-context cliffs, and multi-turn agent growth across ${registry.models.length} models and ${providerCount} providers.`,
   alternates: {
     canonical: "/",
   },
@@ -43,8 +43,26 @@ export default function RootLayout({
   const adsenseClientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ?? "";
 
   return (
-    <html lang="en">
-      <body className="flex min-h-screen flex-col antialiased">
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function() {
+              try {
+                var theme = localStorage.getItem('theme');
+                if (theme === 'light') {
+                  document.documentElement.classList.remove('dark');
+                } else {
+                  document.documentElement.classList.add('dark');
+                }
+              } catch (e) {
+                document.documentElement.classList.add('dark');
+              }
+            })();`,
+          }}
+        />
+      </head>
+      <body className="flex min-h-screen flex-col bg-[#f8fafc] dark:bg-[#090D16] text-slate-900 dark:text-slate-100 antialiased selection:bg-emerald-500/20 selection:text-emerald-400">
         {enableAdsense && adsenseClientId ? (
           <Script
             id="adsense-init"

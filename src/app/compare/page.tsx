@@ -50,26 +50,26 @@ export default function CompareDirectoryPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      <nav aria-label="Breadcrumb" className="no-print text-xs text-slate-500">
-        <Link href="/" className="hover:text-slate-900">
+      <nav aria-label="Breadcrumb" className="no-print text-xs text-slate-500 dark:text-slate-400">
+        <Link href="/" className="hover:text-slate-900 dark:hover:text-white transition-colors">
           Calculator
         </Link>{" "}
-        / <span className="font-semibold text-slate-800">Workload Comparisons</span>
+        / <span className="font-semibold text-slate-800 dark:text-slate-200">Workload Comparisons</span>
       </nav>
 
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="rounded-full bg-emerald-700 px-2.5 py-0.5 font-semibold text-white">
+          <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
             5 Standard Workload Benchmarks
           </span>
-          <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 font-mono text-slate-600">
+          <span className="rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] px-2.5 py-0.5 font-mono text-slate-600 dark:text-slate-300">
             Real-World Token Profiles
           </span>
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl font-sans">
           Workload-First LLM Cost Comparisons
         </h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
+        <p className="max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
           Synthetic token calculators lie because they ignore prefix caching,
           conversation accumulation, and turnaround SLAs. Compare real-world
           monthly API bills across 5 representative production workloads.
@@ -84,80 +84,80 @@ export default function CompareDirectoryPage() {
           return (
             <article
               key={preset.id}
-              className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-xs transition-shadow hover:shadow-md"
+              className="flex flex-col justify-between rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-6 shadow-xs transition-all hover:border-slate-300 dark:hover:border-white/20 hover:shadow-md"
             >
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="rounded-full bg-slate-900 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-400">
+                  <span className="rounded-full bg-slate-100 dark:bg-white/10 px-2.5 py-0.5 text-[11px] font-mono font-semibold text-slate-800 dark:text-slate-200">
                     {preset.shortLabel}
                   </span>
-                  <span className="text-xs font-mono text-slate-500">
+                  <span className="text-xs font-mono text-slate-500 dark:text-slate-400 tabular-nums">
                     {preset.requestsPerDay.toLocaleString("en-US")} req/day
                   </span>
                 </div>
 
                 <div className="space-y-1">
-                  <h2 className="text-lg font-bold text-slate-900 hover:text-emerald-700">
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                     <Link href={`/compare/${preset.slug}/`}>
                       {preset.name}
                     </Link>
                   </h2>
-                  <p className="text-xs leading-relaxed text-slate-600 line-clamp-3">
+                  <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 line-clamp-3">
                     {editorial ? editorial.summary : preset.description}
                   </p>
                 </div>
 
                 {/* Token Specs */}
-                <div className="space-y-1.5 rounded-xl bg-slate-50 p-3 text-xs">
-                  <div className="flex justify-between text-slate-600">
-                    <span>Cacheable Prefix:</span>
-                    <span className="font-mono font-bold text-slate-900">
-                      {preset.prefixTokens.toLocaleString("en-US")} tokens
+                <div className="space-y-2 rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-[#161F30] p-3 text-xs font-mono">
+                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                    <span className="font-sans">Cacheable Prefix:</span>
+                    <span className="font-bold text-slate-900 dark:text-white tabular-nums">
+                      {preset.prefixTokens.toLocaleString("en-US")} tok
                     </span>
                   </div>
-                  <div className="flex justify-between text-slate-600">
-                    <span>Dynamic Input:</span>
-                    <span className="font-mono font-bold text-slate-900">
-                      {preset.dynamicInputTokens.toLocaleString("en-US")} tokens
+                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                    <span className="font-sans">Dynamic Input:</span>
+                    <span className="font-bold text-slate-900 dark:text-white tabular-nums">
+                      {preset.dynamicInputTokens.toLocaleString("en-US")} tok
                     </span>
                   </div>
-                  <div className="flex justify-between text-slate-600">
-                    <span>Output Length:</span>
-                    <span className="font-mono font-bold text-slate-900">
-                      {preset.outputTokens.toLocaleString("en-US")} tokens
+                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                    <span className="font-sans">Output Length:</span>
+                    <span className="font-bold text-cyan-600 dark:text-cyan-400 tabular-nums">
+                      {preset.outputTokens.toLocaleString("en-US")} tok
                     </span>
                   </div>
-                  <div className="flex justify-between text-slate-600">
-                    <span>Cache Hit Rate:</span>
-                    <span className="font-semibold text-emerald-700">
+                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                    <span className="font-sans">Cache Hit Rate:</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
                       {Math.round(preset.cacheHitRate * 100)}%
                     </span>
                   </div>
-                  <div className="flex justify-between text-slate-600">
-                    <span>Batch Mode:</span>
-                    <span className="font-semibold text-slate-800">
+                  <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                    <span className="font-sans">Batch Mode:</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">
                       {preset.useBatch ? "50% Discount (ON)" : "Off (Interactive)"}
                     </span>
                   </div>
                   {preset.turnsPerSession > 1 && (
-                    <div className="flex justify-between text-indigo-700 font-semibold">
-                      <span>Multi-Turn Loop:</span>
+                    <div className="flex justify-between text-violet-600 dark:text-violet-400 font-semibold">
+                      <span className="font-sans">Multi-Turn Loop:</span>
                       <span>{preset.turnsPerSession} turns / session</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-xs">
+              <div className="mt-6 flex items-center justify-between border-t border-slate-100 dark:border-white/5 pt-4 text-xs">
                 <Link
                   href={`/compare/${preset.slug}/`}
-                  className="font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1"
+                  className="font-bold text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 flex items-center gap-1 transition-colors"
                 >
                   Full Cost Breakdown →
                 </Link>
                 <Link
                   href={`/?preset=${preset.slug}`}
-                  className="rounded-lg bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-200 hover:text-slate-900"
+                  className="rounded-lg border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
                 >
                   Load in Calc
                 </Link>

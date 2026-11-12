@@ -14,20 +14,20 @@ export default function PrivacyPage() {
   return (
     <article className="mx-auto max-w-3xl space-y-8">
       <header className="space-y-3">
-        <p className="text-xs font-semibold tracking-wider text-emerald-700 uppercase">
+        <p className="text-xs font-semibold tracking-wider text-emerald-600 dark:text-emerald-400 font-mono uppercase">
           Privacy Architecture
         </p>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl font-sans">
           Zero-Transmission Local Execution
         </h1>
-        <p className="text-sm leading-relaxed text-slate-600">
+        <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
           LLM Cost Intelligence is compiled as a pure static site with zero
           application servers, zero databases, and zero backend logging.
         </p>
       </header>
 
-      <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6 text-sm leading-relaxed text-slate-700">
-        <h2 className="text-base font-bold text-slate-900">
+      <section className="space-y-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-6 text-sm leading-relaxed text-slate-700 dark:text-slate-300 shadow-xs">
+        <h2 className="text-base font-bold text-slate-900 dark:text-white">
           1. Prompt Text &amp; Workload Inputs Never Leave Your Browser
         </h2>
         <p>
@@ -43,8 +43,8 @@ export default function PrivacyPage() {
         </p>
       </section>
 
-      <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6 text-sm leading-relaxed text-slate-700">
-        <h2 className="text-base font-bold text-slate-900">
+      <section className="space-y-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-6 text-sm leading-relaxed text-slate-700 dark:text-slate-300 shadow-xs">
+        <h2 className="text-base font-bold text-slate-900 dark:text-white">
           2. Static Hosting &amp; Advertising Notice
         </h2>
         <p>
@@ -65,7 +65,7 @@ export default function PrivacyPage() {
       <div>
         <Link
           href="/"
-          className="inline-block rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+          className="inline-block rounded-lg bg-slate-900 dark:bg-white px-4 py-2 text-xs font-semibold text-white dark:text-slate-900 hover:bg-slate-800 transition-colors"
         >
           Return to Calculator
         </Link>

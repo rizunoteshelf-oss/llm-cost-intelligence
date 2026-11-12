@@ -89,25 +89,25 @@ export default async function ComparePresetPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      <nav aria-label="Breadcrumb" className="no-print text-xs text-slate-500">
-        <Link href="/" className="hover:text-slate-900">
+      <nav aria-label="Breadcrumb" className="no-print text-xs text-slate-500 dark:text-slate-400">
+        <Link href="/" className="hover:text-slate-900 dark:hover:text-white transition-colors">
           Calculator
         </Link>{" "}
         /{" "}
-        <Link href="/compare/" className="hover:text-slate-900">
+        <Link href="/compare/" className="hover:text-slate-900 dark:hover:text-white transition-colors">
           Workload Comparisons
         </Link>{" "}
-        / <span className="font-semibold text-slate-800">{presetData.name}</span>
+        / <span className="font-semibold text-slate-800 dark:text-slate-200">{presetData.name}</span>
       </nav>
 
       <header className="no-print space-y-3">
-        <p className="text-xs font-semibold tracking-wider text-emerald-700 uppercase">
+        <p className="text-xs font-semibold tracking-wider text-emerald-600 dark:text-emerald-400 font-mono uppercase">
           Workload Benchmark &amp; Cost Model
         </p>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl font-sans">
           {editorial.title}
         </h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
+        <p className="max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
           {editorial.summary}
         </p>
       </header>
@@ -118,36 +118,36 @@ export default async function ComparePresetPage({
         initialPresetId={presetData.id}
       />
 
-      <section className="no-print grid gap-6 border-t border-slate-200 pt-8 md:grid-cols-2">
-        <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6">
-          <h2 className="text-base font-bold text-slate-900">
+      <section className="no-print grid gap-6 border-t border-slate-200 dark:border-white/10 pt-8 md:grid-cols-2">
+        <div className="space-y-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-6 shadow-xs">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">
             Token Anatomy &amp; Scaling Assumptions
           </h2>
-          <ul className="list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-slate-700 sm:text-sm">
+          <ul className="list-disc space-y-1.5 pl-5 text-xs leading-relaxed text-slate-700 dark:text-slate-300 sm:text-sm">
             {editorial.tokenAnatomy.map((item, idx) => (
               <li key={idx}>{item}</li>
             ))}
           </ul>
-          <p className="rounded-lg bg-slate-50 p-3 text-xs leading-relaxed text-slate-700">
-            <strong>Worked Note:</strong> {editorial.workedExampleNote}
+          <p className="rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-[#161F30] p-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+            <strong className="text-slate-900 dark:text-white">Worked Note:</strong> {editorial.workedExampleNote}
           </p>
         </div>
 
-        <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
+        <div className="space-y-4 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-6 shadow-xs">
           <div>
-            <h2 className="text-base font-bold text-slate-900">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">
               Caching &amp; Batch Strategy
             </h2>
-            <p className="mt-1.5 text-xs leading-relaxed text-slate-700 sm:text-sm">
+            <p className="mt-1.5 text-xs leading-relaxed text-slate-700 dark:text-slate-300 sm:text-sm">
               {editorial.cachingStrategy}
             </p>
-            <p className="mt-2 text-xs leading-relaxed text-slate-700 sm:text-sm">
+            <p className="mt-2 text-xs leading-relaxed text-slate-700 dark:text-slate-300 sm:text-sm">
               {editorial.batchGuidance}
             </p>
           </div>
 
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900">
-            <strong>Cost Trap Warning:</strong> {editorial.pitfallWarning}
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3.5 text-xs leading-relaxed text-amber-800 dark:text-amber-300">
+            <strong className="text-amber-900 dark:text-amber-200">Cost Trap Warning:</strong> {editorial.pitfallWarning}
           </div>
         </div>
       </section>
