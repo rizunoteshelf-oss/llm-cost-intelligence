@@ -70,6 +70,12 @@ export default async function ComparePresetPage({
       {
         "@type": "ListItem",
         position: 2,
+        name: "Workload Comparisons",
+        item: `${SITE_URL}/compare/`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
         name: presetData.name,
         item: `${SITE_URL}/compare/${presetData.slug}/`,
       },
@@ -86,6 +92,10 @@ export default async function ComparePresetPage({
       <nav aria-label="Breadcrumb" className="no-print text-xs text-slate-500">
         <Link href="/" className="hover:text-slate-900">
           Calculator
+        </Link>{" "}
+        /{" "}
+        <Link href="/compare/" className="hover:text-slate-900">
+          Workload Comparisons
         </Link>{" "}
         / <span className="font-semibold text-slate-800">{presetData.name}</span>
       </nav>

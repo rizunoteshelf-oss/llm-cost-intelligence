@@ -18,37 +18,37 @@ describe("csv sanitizer & export", () => {
 
   it("builds a complete quote CSV with metadata and rows", () => {
     const model: PricingModel = {
-      id: "openai/gpt-6-luna",
-      slug: "gpt-6-luna",
-      displayName: "GPT-6 Luna",
-      apiModelId: "gpt-6-luna",
+      id: "openai/gpt-4o-mini",
+      slug: "gpt-4o-mini",
+      displayName: "GPT-4o mini",
+      apiModelId: "gpt-4o-mini",
       provider: "openai",
-      modelFamily: "GPT-6",
+      modelFamily: "GPT-4o",
       openWeight: false,
-      contextWindowTokens: 1050000,
-      maxInputTokens: 922000,
-      maxOutputTokens: 128000,
-      reasoningTokensBilledAsOutput: true,
+      contextWindowTokens: 128000,
+      maxOutputTokens: 16384,
+      reasoningTokensBilledAsOutput: false,
+      featuredDetailPage: true,
       pricingTiers: [
         {
-          label: "Standard (<= 272K)",
-          upToTokens: 272000,
-          inputPer1M: 0.1,
-          outputPer1M: 0.5,
-          cachedInputReadPer1M: 0.01,
+          label: "Standard (<= 128K)",
+          upToTokens: null,
+          inputPer1M: 0.15,
+          outputPer1M: 0.6,
+          cachedInputReadPer1M: 0.075,
           cacheWrite5mPer1M: null,
           cacheWrite1hPer1M: null,
-          cacheWrite30mPer1M: 0.125,
-          cacheWrite12hPer1M: 0.25,
+          batchInputPer1M: 0.075,
+          batchOutputPer1M: 0.3,
         },
       ],
       promptCaching: {
         supported: true,
-        mode: "explicit",
+        mode: "automatic",
         minCacheableTokens: 1024,
-        ttlOptions: ["30m", "12h"],
+        ttlOptions: ["automatic"],
         storagePer1MPerHour: null,
-        notes: "1024 min tokens",
+        notes: "Automatic prompt caching with 50% discount on cached reads.",
       },
       batchApi: {
         supported: true,
@@ -56,7 +56,7 @@ describe("csv sanitizer & export", () => {
         cachingAllowedInBatch: true,
         batchDiscountAppliesToCache: true,
         turnaroundWindow: "24h",
-        notes: "50% off all columns",
+        notes: "50% off via OpenAI Batch API",
       },
       hosting: {
         endpointProvider: "OpenAI First-Party",
@@ -66,7 +66,7 @@ describe("csv sanitizer & export", () => {
       effectiveDate: "2026-11-12",
       promotionalExpiryDate: null,
       lastVerifiedDate: "2026-11-12",
-      officialSourceUrl: "https://developers.openai.com/api/docs/pricing",
+      officialSourceUrl: "https://openai.com/api/pricing/",
       notes: "Test",
     };
 
@@ -80,7 +80,7 @@ describe("csv sanitizer & export", () => {
     });
 
     expect(csv).toContain("RAG Q&A");
-    expect(csv).toContain("GPT-6 Luna");
-    expect(csv).toContain("https://developers.openai.com/api/docs/pricing");
+    expect(csv).toContain("GPT-4o mini");
+    expect(csv).toContain("https://openai.com/api/pricing/");
   });
 });

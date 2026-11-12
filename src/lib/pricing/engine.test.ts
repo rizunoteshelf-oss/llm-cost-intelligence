@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import productionRegistry from "../../../data/models.json";
 import {
   calculateAllModels,
   calculateModelCost,
@@ -651,5 +652,61 @@ describe("pricing engine", () => {
     expect(longOpenAi.tierLabel).toBe("Long Context (> 272K)");
     expect(longOpenAi.effectiveRates?.inputPer1M).toBeCloseTo(20.0, 6);
     expect(longOpenAi.effectiveRates?.outputPer1M).toBeCloseTo(75.0, 6);
+  });
+});
+
+describe("production models.json registry integration", () => {
+  it("evaluates all models across all 5 canonical presets without NaN or crashes", () => {
+    const models = (productionRegistry as unknown as { models: PricingModel[] }).models;
+    expect(models.length).toBeGreaterThanOrEqual(20);
+
+    for (const preset of WORKLOAD_PRESETS) {
+      const results = calculateAllModels(models, {
+        ...preset,
+        useOffPeak: false,
+        referenceDate: "2026-11-12",
+      });
+
+      expect(results).toHaveLength(models.length);
+      for (const res of results) {
+        expect(res.status).toBe("VALID");
+        expect(Number.isFinite(res.dailyCostUsd)).toBe(true);
+        expect(Number.isFinite(res.monthlyCostUsd)).toBe(true);
+        expect(Number.isFinite(res.costPer1kTurnsUsd)).toBe(true);
+        expect(res.monthlyCostUsd).toBeGreaterThanOrEqual(0);
+        expect(res.effectiveRates).not.toBeNull();
+      }
+    }
+  });
+
+  it("verifies key models exist with accurate pricing rate cards", () => {
+    const models = (productionRegistry as unknown as { models: PricingModel[] }).models;
+    const findModel = (slug: string) => models.find((m) => m.slug === slug);
+
+    const gpt4o = findModel("gpt-4o");
+    expect(gpt4o).toBeDefined();
+    expect(gpt4o?.pricingTiers[0]?.inputPer1M).toBe(2.5);
+    expect(gpt4o?.pricingTiers[0]?.outputPer1M).toBe(10);
+    expect(gpt4o?.pricingTiers[0]?.cachedInputReadPer1M).toBe(1.25);
+    expect(gpt4o?.batchApi.discountPercent).toBe(50);
+
+    const sonnet = findModel("claude-3-5-sonnet-latest");
+    expect(sonnet).toBeDefined();
+    expect(sonnet?.pricingTiers[0]?.inputPer1M).toBe(3);
+    expect(sonnet?.pricingTiers[0]?.outputPer1M).toBe(15);
+    expect(sonnet?.pricingTiers[0]?.cachedInputReadPer1M).toBe(0.3);
+    expect(sonnet?.pricingTiers[0]?.cacheWrite5mPer1M).toBe(3.75);
+
+    const deepseek = findModel("deepseek-chat");
+    expect(deepseek).toBeDefined();
+    expect(deepseek?.pricingTiers[0]?.inputPer1M).toBe(0.14);
+    expect(deepseek?.pricingTiers[0]?.outputPer1M).toBe(0.28);
+    expect(deepseek?.pricingTiers[0]?.cachedInputReadPer1M).toBe(0.014);
+
+    const gemini2Flash = findModel("gemini-2-0-flash");
+    expect(gemini2Flash).toBeDefined();
+    expect(gemini2Flash?.pricingTiers[0]?.inputPer1M).toBe(0.1);
+    expect(gemini2Flash?.pricingTiers[0]?.outputPer1M).toBe(0.4);
+    expect(gemini2Flash?.pricingTiers[0]?.cachedInputReadPer1M).toBe(0.025);
   });
 });

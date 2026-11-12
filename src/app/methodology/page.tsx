@@ -62,11 +62,10 @@ export default function MethodologyPage() {
           1. Context Tier &amp; Long-Context Cliff Resolution
         </h2>
         <p className="text-sm leading-relaxed text-slate-700">
-          Providers such as OpenAI (<code>&gt;272K</code> input tokens),
-          Anthropic Haiku 5.5 (<code>&gt;100K</code> total input tokens), and
-          Google Gemini 3.1 Pro (<code>&gt;200K</code> prompt tokens) apply
-          step-function rate jumps to the <strong>entire request</strong> once
-          input exceeds the threshold. Our engine resolves{" "}
+          Providers such as Google Gemini 1.5 Pro and 1.5 Flash (<code>&gt;128K</code> prompt tokens)
+          apply step-function rate jumps to the <strong>entire request</strong> once
+          input exceeds the threshold (e.g. Gemini 1.5 Pro input rates double from $1.25 to $2.50/1M).
+          Our engine resolves{" "}
           <code>totalTurnInput = prefixTokens + dynamicInputTokens</code>{" "}
           against sorted <code>pricingTiers</code> and flags{" "}
           <code>EXCEEDS_CONTEXT_WINDOW</code> if input exceeds{" "}
@@ -94,10 +93,11 @@ dailyPrefixCost =
   (writeReqs * prefixM * r_write)`}
         </pre>
         <p className="text-xs leading-relaxed text-slate-600">
-          If <code>prefixTokens &lt; minCacheableTokens</code> (e.g., 512 on
-          Claude 5.x, 1,024 on OpenAI GPT-6.x, 4,096 on Gemini), caching is
-          automatically disabled to reflect silent fallback to standard input
-          billing. Explicit hourly cache storage (e.g., Gemini{" "}
+          If <code>prefixTokens &lt; minCacheableTokens</code> (e.g., 1,024 on
+          Claude 3.5 Sonnet / 2,048 on Haiku, 1,024 on OpenAI GPT-4o, 64 on
+          DeepSeek, 32,768 on Google Gemini), caching is automatically
+          disabled to reflect silent fallback to standard input billing.
+          Explicit hourly cache storage (e.g., Gemini{" "}
           <code>storagePer1MPerHour</code>) is added un-discounted across{" "}
           <code>H_active</code>.
         </p>
@@ -110,19 +110,19 @@ dailyPrefixCost =
         <ul className="list-disc space-y-2 pl-5 text-sm text-slate-700">
           <li>
             <strong>Stacks with Batch Discount:</strong> Anthropic Message
-            Batches, OpenAI Batch (GPT-5+), and Gemini 3.8 Flash / 4 Carbon
-            discount both uncached and cached token reads.
+            Batches, OpenAI Batch API, and Google Gemini Batch API
+            discount both standard and cached token reads (typically 50% off).
           </li>
           <li>
-            <strong>Allowed at Standard Cache Rates:</strong> Gemini 3.1 Pro
-            Preview allows caching in Batch mode, but bills cached reads and
-            storage at standard rates while discounting uncached tokens 50%.
+            <strong>Batch Without Caching Stacking:</strong> Mistral Batch API
+            offers 50% discount on standard rates, but prompt caching does not
+            compound inside batch jobs.
           </li>
           <li>
             <strong>Disallowed / 0% Discount:</strong> Groq &amp; Amazon Bedrock
             disable prompt caching in Batch mode; Together AI applies 0% batch
             discount to serverless chat models; DeepSeek has no Batch API
-            (offering a 50% Off-Peak UTC window instead).
+            (offering a 50% Off-Peak UTC window from 16:30 to 00:30 UTC instead).
           </li>
         </ul>
       </section>

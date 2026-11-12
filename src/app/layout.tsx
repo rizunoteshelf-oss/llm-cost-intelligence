@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import rawRegistry from "@/data/models.json";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import type { PricingRegistry } from "@/lib/pricing/schema";
 import "./globals.css";
+
+const registry = rawRegistry as unknown as PricingRegistry;
+const providerCount = new Set(registry.models.map((m) => m.provider)).size;
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") ||
@@ -15,8 +20,7 @@ export const metadata: Metadata = {
       "LLM API Pricing Calculator 2026 - Claude 3.5 Sonnet, GPT-4o, DeepSeek V3 & Gemini 2.0",
     template: "%s | LLM Cost Intelligence",
   },
-  description:
-    "Free client-side LLM API pricing calculator modeling real-world prompt caching write/read break-even, Batch API discount stacking (up to 50% off), long-context cliffs, and multi-turn agent growth across 20 models and 8 providers.",
+  description: `Free client-side LLM API pricing calculator modeling real-world prompt caching write/read break-even, Batch API discount stacking (up to 50% off), long-context cliffs, and multi-turn agent growth across ${registry.models.length} models and ${providerCount} providers.`,
   alternates: {
     canonical: "/",
   },

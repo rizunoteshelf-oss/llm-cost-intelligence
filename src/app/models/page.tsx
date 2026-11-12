@@ -13,15 +13,13 @@ const SITE_URL =
 
 export const metadata: Metadata = {
   title: "LLM Model Directory & API Pricing Rate Cards 2026",
-  description:
-    "Explore verified API token pricing, prompt caching read/write rates, and Batch API discounts across 20 production models including Claude 3.5 Sonnet, GPT-4o, DeepSeek V3, and Gemini 2.0.",
+  description: `Explore verified API token pricing, prompt caching read/write rates, and Batch API discounts across ${registry.models.length} production models including Claude 3.5 Sonnet, GPT-4o, DeepSeek V3, and Gemini 2.0.`,
   alternates: {
     canonical: "/models/",
   },
   openGraph: {
     title: "LLM Model Directory & API Pricing Rate Cards 2026",
-    description:
-      "Explore verified API token pricing, prompt caching read/write rates, and Batch API discounts across 20 production models.",
+    description: `Explore verified API token pricing, prompt caching read/write rates, and Batch API discounts across ${registry.models.length} production models.`,
     url: `${SITE_URL}/models/`,
   },
 };

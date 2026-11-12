@@ -124,6 +124,22 @@ export default function HomePage() {
                 Long-Context Document Summarization →
               </Link>
             </li>
+            <li>
+              <Link
+                href="/compare/extraction/"
+                className="font-medium text-slate-800 hover:text-emerald-700 hover:underline"
+              >
+                JSON / ETL Extraction →
+              </Link>
+            </li>
+            <li className="pt-1">
+              <Link
+                href="/compare/"
+                className="font-semibold text-emerald-700 hover:underline"
+              >
+                Browse all 5 workload benchmarks →
+              </Link>
+            </li>
           </ul>
         </div>
 

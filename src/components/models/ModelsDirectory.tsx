@@ -10,7 +10,12 @@ interface ModelsDirectoryProps {
 
 function fmtRate(v: number | null | undefined): string {
   if (v === null || v === undefined) return "N/A";
-  return `$${v.toFixed(v < 0.05 && v > 0 ? 4 : 2).replace(/0+$/, "").replace(/\.$/, ".00")}`;
+  if (v === 0) return "$0.00";
+  const formatted = Number(v.toFixed(5)).toString();
+  const [intPart, decPart] = formatted.split(".");
+  if (!decPart) return `$${intPart}.00`;
+  if (decPart.length === 1) return `$${intPart}.${decPart}0`;
+  return `$${formatted}`;
 }
 
 function fmtTokens(count: number): string {
@@ -65,7 +70,7 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by model name, API ID, or provider..."
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 shadow-xs focus:border-emerald-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 shadow-xs focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
           />
         </div>
 

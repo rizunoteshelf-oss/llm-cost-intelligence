@@ -22,6 +22,16 @@ export function generateStaticParams(): Array<{ slug: string }> {
   return getFeaturedModels().map((m) => ({ slug: m.slug }));
 }
 
+function fmtRate(v: number | null | undefined): string {
+  if (v === null || v === undefined) return "N/A";
+  if (v === 0) return "$0.00";
+  const formatted = Number(v.toFixed(5)).toString();
+  const [intPart, decPart] = formatted.split(".");
+  if (!decPart) return `$${intPart}.00`;
+  if (decPart.length === 1) return `$${intPart}.${decPart}0`;
+  return `$${formatted}`;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -34,7 +44,7 @@ export async function generateMetadata({
   }
   const tier = model.pricingTiers[0];
   const rateStr = tier
-    ? `$${tier.inputPer1M.toFixed(2)} in / $${tier.outputPer1M.toFixed(2)} out`
+    ? `${fmtRate(tier.inputPer1M)} in / ${fmtRate(tier.outputPer1M)} out`
     : "";
 
   return {
@@ -49,11 +59,6 @@ export async function generateMetadata({
       url: `${SITE_URL}/models/${model.slug}/`,
     },
   };
-}
-
-function fmtRate(v: number | null | undefined): string {
-  if (v === null || v === undefined) return "N/A";
-  return `$${v.toFixed(v < 0.05 && v > 0 ? 4 : 2).replace(/0+$/, "").replace(/\.$/, ".00")}`;
 }
 
 interface ModelFaq {
@@ -73,27 +78,29 @@ function getModelFaqs(model: PricingModel): ModelFaq[] {
   if (model.provider === "anthropic") {
     faqs.push({
       question: `Is ${model.displayName} prompt caching cheaper than OpenAI GPT-4o?`,
-      answer: `Yes, for high-frequency workflows. Anthropic charges a 1.25x write surcharge ($${(inputRate * 1.25).toFixed(2)}/1M for a 5-minute TTL) on cache creation, but offers a 90% discount on cache reads ($${(inputRate * 0.1).toFixed(2)}/1M). In comparison, OpenAI GPT-4o has free automatic cache writes ($2.50/1M) but only a 50% read discount ($1.25/1M). Once a cached prefix is reused more than 1.14 times within its TTL, ${model.displayName} is significantly cheaper per cached read.`,
+      answer: `Yes, for high-frequency workflows. Anthropic charges a 1.25x write surcharge (${fmtRate(inputRate * 1.25)}/1M for a 5-minute TTL) on cache creation, but offers a 90% discount on cache reads (${fmtRate(cachedReadRate ?? inputRate * 0.1)}/1M). In comparison, OpenAI GPT-4o has free automatic cache writes ($2.50/1M) but only a 50% read discount ($1.25/1M). Once a cached prefix is reused more than 1.14 times within its TTL, ${model.displayName} is significantly cheaper per cached read.`,
     });
   } else if (model.provider === "openai") {
     faqs.push({
       question: `How does ${model.displayName} prompt caching work compared to Anthropic Claude?`,
-      answer: `OpenAI provides automatic prompt caching for prompts containing 1,024 or more prefix tokens. There is zero cache write surcharge (you pay the standard $${inputRate.toFixed(2)}/1M input rate on cache write), and cached reads receive a flat 50% discount ($${(inputRate * 0.5).toFixed(model.slug.includes("mini") ? 4 : 2)}/1M). Unlike Anthropic which requires explicit cache breakpoint headers and charges 1.25x for writes, OpenAI caching is zero-configuration and zero-surcharge.`,
+      answer: `OpenAI provides automatic prompt caching for prompts containing 1,024 or more prefix tokens. There is zero cache write surcharge (you pay the standard ${fmtRate(inputRate)}/1M input rate on cache write), and cached reads receive a flat 50% discount (${fmtRate(cachedReadRate ?? inputRate * 0.5)}/1M). Unlike Anthropic which requires explicit cache breakpoint headers and charges 1.25x for writes, OpenAI caching is zero-configuration and zero-surcharge.`,
     });
   } else if (model.provider === "deepseek") {
     faqs.push({
       question: `How much cheaper is ${model.displayName} compared to OpenAI and Anthropic?`,
-      answer: `At $${inputRate.toFixed(2)}/1M input and $${outputRate.toFixed(2)}/1M output (with cache hits at $${cachedReadRate?.toFixed(model.slug.includes("chat") ? 3 : 2)}/1M), ${model.displayName} is over 15x to 25x cheaper than proprietary Western frontier models. In addition, DeepSeek offers a 50% off-peak discount daily from 16:30 to 00:30 UTC, dropping input rates even further.`,
+      answer: `At ${fmtRate(inputRate)}/1M input and ${fmtRate(outputRate)}/1M output (with cache hits at ${fmtRate(cachedReadRate)}/1M), ${model.displayName} is over 15x to 25x cheaper than proprietary Western frontier models. In addition, DeepSeek offers a 50% off-peak discount daily from 16:30 to 00:30 UTC, dropping input rates even further.`,
     });
   } else if (model.provider === "google") {
     faqs.push({
       question: `How does Google Gemini context caching pricing work for ${model.displayName}?`,
-      answer: `Google Gemini offers explicit context caching for prompts with at least 32,768 tokens. Cached reads receive a 75% discount off standard input rate ($${cachedReadRate != null ? cachedReadRate.toFixed(model.slug.includes("flash") ? 4 : 4) : "0.025"}/1M). Context storage is billed per hour ($${model.promptCaching.storagePer1MPerHour?.toFixed(2) ?? "1.00"}/1M tokens/hour). For long documents and books reused repeatedly, context caching provides immense ROI.`,
+      answer: `Google Gemini offers explicit context caching for prompts with at least 32,768 tokens. Cached reads receive a 75% discount off standard input rate (${fmtRate(cachedReadRate)}/1M). Context storage is billed per hour (${fmtRate(model.promptCaching.storagePer1MPerHour)}/1M tokens/hour). For long documents and books reused repeatedly, context caching provides immense ROI.`,
     });
   } else {
     faqs.push({
       question: `How does ${model.displayName} pricing compare to proprietary API models?`,
-      answer: `At $${inputRate.toFixed(2)}/1M input and $${outputRate.toFixed(2)}/1M output on ${model.hosting.endpointProvider}, ${model.displayName} delivers open-weights economics with zero proprietary lock-in, customizable inference parameters, and dedicated throughput.`,
+      answer: model.openWeight
+        ? `At ${fmtRate(inputRate)}/1M input and ${fmtRate(outputRate)}/1M output on ${model.hosting.endpointProvider}, ${model.displayName} delivers open-weights economics with zero proprietary lock-in, customizable inference parameters, and dedicated throughput.`
+        : `At ${fmtRate(inputRate)}/1M input and ${fmtRate(outputRate)}/1M output on ${model.hosting.endpointProvider}, ${model.displayName} provides enterprise cloud hosting with unified billing, VPC security, and regulatory compliance on ${model.hosting.endpointProvider}.`,
     });
   }
 
@@ -110,16 +117,16 @@ function getModelFaqs(model: PricingModel): ModelFaq[] {
   faqs.push({
     question: `What is the context window for ${model.displayName} and are there tiered price cliffs?`,
     answer: hasLongContextCliff
-      ? `${model.displayName} features a total context window of ${model.contextWindowTokens.toLocaleString("en-US")} tokens with tiered pricing: ${model.pricingTiers.map((t) => `${t.label}: $${t.inputPer1M.toFixed(2)} in / $${t.outputPer1M.toFixed(2)} out`).join("; ")}. Prompts exceeding the tier threshold trigger higher per-token rates.`
-      : `${model.displayName} supports a flat context window of ${model.contextWindowTokens.toLocaleString("en-US")} tokens (max output: ${model.maxOutputTokens.toLocaleString("en-US")} tokens) with no mid-window price jumps. Standard input ($${inputRate.toFixed(2)}/1M) and output ($${outputRate.toFixed(2)}/1M) remain identical regardless of prompt length.`,
+      ? `${model.displayName} features a total context window of ${model.contextWindowTokens.toLocaleString("en-US")} tokens with tiered pricing: ${model.pricingTiers.map((t) => `${t.label}: ${fmtRate(t.inputPer1M)} in / ${fmtRate(t.outputPer1M)} out`).join("; ")}. Prompts exceeding the tier threshold trigger higher per-token rates.`
+      : `${model.displayName} supports a flat context window of ${model.contextWindowTokens.toLocaleString("en-US")} tokens (max output: ${model.maxOutputTokens.toLocaleString("en-US")} tokens) with no mid-window price jumps. Standard input (${fmtRate(inputRate)}/1M) and output (${fmtRate(outputRate)}/1M) remain identical regardless of prompt length.`,
   });
 
   // FAQ 4: Reasoning Tokens Billing
   faqs.push({
     question: `How are reasoning or thinking tokens billed on ${model.displayName}?`,
     answer: model.reasoningTokensBilledAsOutput
-      ? `Reasoning and chain-of-thought tokens produced by ${model.displayName} are billed at the standard completion output rate of $${outputRate.toFixed(2)} per 1M tokens, exactly like visible user-facing output tokens. Be sure to account for reasoning token overhead in multi-turn or complex STEM benchmarks.`
-      : `${model.displayName} does not charge separate reasoning token surcharges. All generated completion tokens are billed at the standard output rate of $${outputRate.toFixed(2)} per 1M tokens.`,
+      ? `Reasoning and chain-of-thought tokens produced by ${model.displayName} are billed at the standard completion output rate of ${fmtRate(outputRate)} per 1M tokens, exactly like visible user-facing output tokens. Be sure to account for reasoning token overhead in multi-turn or complex STEM benchmarks.`
+      : `${model.displayName} does not charge separate reasoning token surcharges. All generated completion tokens are billed at the standard output rate of ${fmtRate(outputRate)} per 1M tokens.`,
   });
 
   // FAQ 5: Monthly Production Cost Example

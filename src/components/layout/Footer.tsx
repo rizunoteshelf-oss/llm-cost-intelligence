@@ -1,4 +1,8 @@
 import Link from "next/link";
+import rawRegistry from "@/data/models.json";
+import type { PricingRegistry } from "@/lib/pricing/schema";
+
+const registry = rawRegistry as unknown as PricingRegistry;
 
 export function Footer() {
   return (
@@ -54,7 +58,7 @@ export function Footer() {
                   href="/models/"
                   className="font-semibold text-emerald-700 hover:text-emerald-900"
                 >
-                  All 20 Models Directory →
+                  All {registry.models.length} Models Directory →
                 </Link>
               </li>
               <li>
