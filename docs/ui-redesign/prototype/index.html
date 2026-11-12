@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM Cost Intelligence — FinOps UI Redesign Prototype</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="dark">
+
+  <!-- Header -->
+  <header>
+    <div class="container header-inner">
+      <a href="#" class="brand">
+        <div class="emblem">CI</div>
+        <div class="brand-text">
+          <h1>LLM Cost Intelligence</h1>
+          <p>Institutional Token &amp; Caching FinOps</p>
+        </div>
+      </a>
+      <nav class="nav-links">
+        <a href="#calculator" class="nav-link active">Calculator</a>
+        <a href="#models" class="nav-link">Model Directory</a>
+        <a href="#workloads" class="nav-link">Workloads</a>
+        <a href="#methodology" class="nav-link">Methodology</a>
+        <a href="#about" class="nav-link">About</a>
+      </nav>
+      <div class="header-actions">
+        <button id="theme-toggle-btn" class="theme-toggle" title="Toggle Light/Dark Theme" aria-label="Toggle theme">☾</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Provenance & Freshness Bar -->
+    <div class="provenance-bar">
+      <div class="provenance-pills">
+        <span class="pill pill-emerald">● 20 Verified Models · 8 Providers</span>
+        <span class="pill pill-cyan">Verified Nov 2026</span>
+        <span class="pill pill-amber">100% Client-Side WASM · Zero Server Data</span>
+      </div>
+      <a href="#methodology" style="color:var(--emerald-500); text-decoration:none; font-weight:600; font-size:11px;">Audit Formulas &amp; Sources →</a>
+    </div>
+
+    <!-- Hero Title -->
+    <section class="hero-banner">
+      <h2>LLM API Cost &amp; FinOps Intelligence</h2>
+      <p>Workload-first cost simulation across OpenAI, Anthropic, Google Gemini, DeepSeek, Mistral, Groq, Together AI, and Amazon Bedrock. Accurately models prompt cache break-even write fees, 50% Batch API stacking, long-context cliffs, and multi-turn conversation growth—100% locally in browser memory.</p>
+    </section>
+
+    <!-- Main Split-Screen Layout -->
+    <div class="layout-grid">
+
+      <!-- LEFT PANEL: Configuration -->
+      <div class="controls-panel">
+
+        <!-- Card 1: Workload Presets -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-step-num">1</span>
+              <span>Select Workload Preset</span>
+            </div>
+            <span style="font-size:11px; color:var(--text-secondary);">Click any profile to load verified parameters</span>
+          </div>
+
+          <div class="preset-grid">
+            <button class="preset-btn active" data-preset="rag-qa">
+              <div class="preset-name">RAG Q&amp;A</div>
+              <div class="preset-tokens">5k in · 450 out</div>
+              <div class="preset-meta">
+                <span>2k req/d</span>
+                <span>85% hit</span>
+              </div>
+            </button>
+
+            <button class="preset-btn" data-preset="code-generation">
+              <div class="preset-name">Code Generation</div>
+              <div class="preset-tokens">14.5k in · 1.6k out</div>
+              <div class="preset-meta">
+                <span>500 req/d</span>
+                <span>80% hit</span>
+              </div>
+            </button>
+
+            <button class="preset-btn" data-preset="document-summarization">
+              <div class="preset-name">Doc Summary</div>
+              <div class="preset-tokens">45.6k in · 1.2k out</div>
+              <div class="preset-meta">
+                <span>300 req/d</span>
+                <span>Batch 50%</span>
+              </div>
+            </button>
+
+            <button class="preset-btn" data-preset="support-agent">
+              <div class="preset-name">Support Agent</div>
+              <div class="preset-tokens">3.3k in · 350 out</div>
+              <div class="preset-meta">
+                <span>1.5k req/d</span>
+                <span>5 turns</span>
+              </div>
+            </button>
+
+            <button class="preset-btn" data-preset="extraction">
+              <div class="preset-name">JSON Extraction</div>
+              <div class="preset-tokens">3k in · 250 out</div>
+              <div class="preset-meta">
+                <span>10k req/d</span>
+                <span>90% hit</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- FIXED INLINE CONTEXTUAL PROFILE BAR (No overlay collision!) -->
+          <div class="preset-context-bar" id="preset-context-box">
+            <div class="preset-context-desc" id="context-desc">
+              Grounded retrieval Q&amp;A with shared system citation prefix (1.8K tok) and dynamic retrieved chunks (3.2K tok).
+            </div>
+            <div class="preset-context-tags">
+              <span class="pill pill-cyan" id="context-prefix-tag">Prefix: 1,800 tok</span>
+              <span class="pill pill-emerald" id="context-out-tag">Output: 450 tok</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Level 1 Quick Estimate Tokens -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-step-num">2</span>
+              <span>Token Dimensions &amp; Scale</span>
+            </div>
+            <span style="font-size:11px; color:var(--text-secondary);">Direct numeric input or slider</span>
+          </div>
+
+          <div class="input-row">
+            <div class="input-label-wrap">
+              <span class="input-label">Cacheable Prefix Tokens</span>
+              <span class="input-sublabel">System prompts, few-shot examples, tools</span>
+              <div class="slider-container" style="margin-top:6px;">
+                <input type="range" id="slider-prefix" min="0" max="64000" step="100" value="1800">
+              </div>
+            </div>
+            <input type="text" id="input-prefix" class="formatted-input" value="1,800">
+          </div>
+
+          <div class="input-row">
+            <div class="input-label-wrap">
+              <span class="input-label">Uncached Dynamic Input</span>
+              <span class="input-sublabel">User query, retrieved context, chat history</span>
+              <div class="slider-container" style="margin-top:6px;">
+                <input type="range" id="slider-dynamic" min="100" max="128000" step="100" value="3200">
+              </div>
+            </div>
+            <input type="text" id="input-dynamic" class="formatted-input" value="3,200">
+          </div>
+
+          <div class="input-row">
+            <div class="input-label-wrap">
+              <span class="input-label">Output Tokens / Turn</span>
+              <span class="input-sublabel">Generated completion + reasoning tokens</span>
+              <div class="slider-container" style="margin-top:6px;">
+                <input type="range" id="slider-output" min="50" max="16000" step="50" value="450">
+              </div>
+            </div>
+            <input type="text" id="input-output" class="formatted-input" value="450">
+          </div>
+
+          <div class="input-row" style="margin-bottom:0;">
+            <div class="input-label-wrap">
+              <span class="input-label">Requests / Day</span>
+              <span class="input-sublabel">Daily API call volume</span>
+              <div class="slider-container" style="margin-top:6px;">
+                <input type="range" id="slider-requests" min="10" max="100000" step="100" value="2000">
+              </div>
+            </div>
+            <input type="text" id="input-requests" class="formatted-input" value="2,000">
+          </div>
+        </div>
+
+        <!-- Card 3: Level 2 Advanced Workload Accordion -->
+        <div class="accordion" id="advanced-accordion">
+          <button class="accordion-trigger" id="accordion-btn">
+            <span>Level 2: Advanced FinOps Workload Dynamics (Caching &amp; Modifiers)</span>
+            <span style="color:var(--emerald-500); font-family:var(--font-mono);">▼ Expand Controls</span>
+          </button>
+          <div class="accordion-content">
+            <div class="toggle-grid">
+              <div class="toggle-chip active" id="toggle-cache">
+                <span class="toggle-chip-label">Prompt Caching</span>
+                <div class="toggle-switch"><div class="toggle-knob"></div></div>
+              </div>
+              <div class="toggle-chip" id="toggle-batch">
+                <span class="toggle-chip-label">Batch API (50% Off)</span>
+                <div class="toggle-switch"><div class="toggle-knob"></div></div>
+              </div>
+              <div class="toggle-chip" id="toggle-offpeak">
+                <span class="toggle-chip-label">DeepSeek Off-Peak</span>
+                <div class="toggle-switch"><div class="toggle-knob"></div></div>
+              </div>
+            </div>
+            <p style="margin-top:12px; font-size:11px; color:var(--text-muted); line-height:1.4;">
+              *Evaluates Anthropic 1.25x write surcharge (5m TTL), Gemini hourly retention storage, and provider-specific cache minimums (64 to 32,768 tokens).
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT PANEL: Sticky Spend Leaderboard -->
+      <div class="sticky-leaderboard">
+        <div class="leaderboard-card">
+          <div class="card-header" style="margin-bottom:14px;">
+            <div>
+              <h3 style="font-size:15px; font-weight:800; letter-spacing:-0.02em;">Live FinOps Spend Leaderboard</h3>
+              <p style="font-size:11px; color:var(--text-secondary);">Real-time simulation across 20 verified models</p>
+            </div>
+            <button class="pill pill-emerald" style="cursor:pointer;" onclick="navigator.clipboard.writeText(window.location.href); alert('Shareable Scenario URL copied!');">Share Scenario</button>
+          </div>
+
+          <!-- 3 Spend KPI Cards -->
+          <div class="kpi-grid">
+            <!-- Lowest Cost Card -->
+            <div class="kpi-card kpi-lowest">
+              <div>
+                <div class="kpi-header">Lowest Cost</div>
+                <div class="kpi-val" id="kpi-lowest-val">$17.16</div>
+                <div class="kpi-model-label" id="kpi-lowest-model">Llama 3.1 8B Instant</div>
+              </div>
+              <div class="kpi-footer-note" id="kpi-lowest-day">$0.57/day</div>
+            </div>
+
+            <!-- Baseline Card -->
+            <div class="kpi-card kpi-baseline">
+              <div>
+                <div class="kpi-header">Frontier Baseline</div>
+                <div class="kpi-val" id="kpi-baseline-val">$183.60</div>
+                <div class="kpi-model-label" id="kpi-baseline-model">Claude 3.5 Sonnet</div>
+              </div>
+              <div class="kpi-footer-note" id="kpi-baseline-spread">10.7x spread</div>
+            </div>
+
+            <!-- Optimization Card -->
+            <div class="kpi-card kpi-opt">
+              <div>
+                <div class="kpi-header">Optimization</div>
+                <div class="kpi-val" id="kpi-opt-val">-23.3%</div>
+                <div class="kpi-model-label" id="kpi-opt-sub">Best: DeepSeek-V3</div>
+              </div>
+              <div class="kpi-footer-note">Prompt Cache Active</div>
+            </div>
+          </div>
+
+          <!-- Top 6 Models Ranked List -->
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-secondary); margin-bottom:10px;">
+            Model Spend Comparison (Top 6)
+          </div>
+          <div class="model-rank-list" id="top-models-list">
+            <!-- Dynamically populated by app.js -->
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Mobile Floating Sticky Spend Bar -->
+  <div class="mobile-sticky-bar">
+    <div class="mobile-bar-inner">
+      <div>
+        <div style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Lowest Spend</div>
+        <div class="mobile-bar-spend" id="mobile-spend-val">$17.16/mo</div>
+      </div>
+      <button class="mobile-bar-action" onclick="document.querySelector('.sticky-leaderboard').scrollIntoView({behavior:'smooth'});">View Leaderboard</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -13,6 +13,8 @@ export type EndpointType =
   | "managed_cloud"
   | "inference_specialist";
 
+export type LifecycleStatus = "current" | "legacy" | "preview";
+
 export type CachingMode = "automatic" | "explicit" | "none";
 
 export type CacheTtlOption =
@@ -103,6 +105,7 @@ export interface PricingModel {
   provider: ProviderId;
   modelFamily: string;
   openWeight: boolean;
+  lifecycleStatus?: LifecycleStatus;
   contextWindowTokens: number;
   /** Optional separate max input limit (e.g., OpenAI 922K max input inside 1.05M total window) */
   maxInputTokens?: number;
@@ -137,6 +140,12 @@ const VALID_PROVIDERS: ReadonlySet<string> = new Set([
   "groq",
   "together",
   "bedrock",
+]);
+
+const VALID_LIFECYCLE_STATUSES: ReadonlySet<string> = new Set([
+  "current",
+  "legacy",
+  "preview",
 ]);
 
 const VALID_ENDPOINT_TYPES: ReadonlySet<string> = new Set([
@@ -241,6 +250,12 @@ export function validateRegistry(input: unknown): RegistryValidationResult {
     }
     if (typeof m.openWeight !== "boolean") {
       errors.push(`${prefix}.openWeight must be boolean.`);
+    }
+    if (
+      m.lifecycleStatus !== undefined &&
+      (typeof m.lifecycleStatus !== "string" || !VALID_LIFECYCLE_STATUSES.has(m.lifecycleStatus))
+    ) {
+      errors.push(`${prefix}.lifecycleStatus must be "current", "legacy", or "preview" if defined.`);
     }
     if (!isPositiveFinite(m.contextWindowTokens)) {
       errors.push(`${prefix}.contextWindowTokens must be > 0.`);

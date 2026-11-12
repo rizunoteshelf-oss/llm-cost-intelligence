@@ -32,6 +32,16 @@ interface CalculatorShellProps {
 type SortKey = "monthly" | "per1k" | "savings";
 type WeightFilter = "all" | "open" | "proprietary";
 
+function fmtUsd(val: number, decimals = 2): string {
+  if (val > 0 && val < 0.01 && decimals === 2) {
+    return `$${val.toFixed(4)}`;
+  }
+  return `$${val.toLocaleString("en-US", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  })}`;
+}
+
 function resolveUsResidencyLabel(model: PricingModel): string | undefined {
   const match = model.hosting.regionMultipliers?.find(
     (r) =>
@@ -75,6 +85,10 @@ export function CalculatorShell({
   const [activePresetId, setActivePresetId] = useState<
     WorkloadPresetId | "custom"
   >(initialPresetId);
+
+  const [viewMode, setViewMode] = useState<"quick" | "pro">("pro");
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [includeLegacy, setIncludeLegacy] = useState(false);
 
   const [prefixTokens, setPrefixTokens] = useState(initialPreset.prefixTokens);
   const [dynamicInputTokens, setDynamicInputTokens] = useState(
@@ -202,10 +216,16 @@ export function CalculatorShell({
         setUseBatch(qBatch);
         touchedCustom = true;
       }
-      if (qOffPeak !== undefined) setUseOffPeak(qOffPeak);
-      if (qUs !== undefined) setUseUsResidency(qUs);
+      if (qOffPeak !== undefined) {
+        setUseOffPeak(qOffPeak);
+        touchedCustom = true;
+      }
+      if (qUs !== undefined) {
+        setUseUsResidency(qUs);
+        touchedCustom = true;
+      }
 
-      if (touchedCustom && !presetObj) {
+      if (touchedCustom && !pId) {
         setActivePresetId("custom");
       }
     });
@@ -215,9 +235,10 @@ export function CalculatorShell({
     };
   }, []);
 
-  // Sync state to URL params on user interaction
+  // Sync state to URL params (shallow replaceState)
   useEffect(() => {
     if (!hasInteractedRef.current) return;
+
     const params = new URLSearchParams();
     if (activePresetId !== "custom") {
       params.set("preset", activePresetId);
@@ -229,17 +250,17 @@ export function CalculatorShell({
     params.set("hit", String(cacheHitRatePct));
     params.set("writes", String(cacheWritesPerHour));
     params.set("ttl", cacheTtl);
-    params.set("cache", useCaching ? "1" : "0");
-    params.set("batch", useBatch ? "1" : "0");
-    params.set("turns", String(turnsPerSession));
-    if (turnsPerSession > 1) {
-      params.set("follow", String(followUpUserTokens));
-    }
+    if (useCaching) params.set("cache", "1");
+    if (useBatch) params.set("batch", "1");
     if (useOffPeak) params.set("offpeak", "1");
     if (useUsResidency) params.set("us", "1");
+    if (turnsPerSession > 1) {
+      params.set("turns", String(turnsPerSession));
+      params.set("follow", String(followUpUserTokens));
+    }
 
-    const nextUrl = `${window.location.pathname}?${params.toString()}`;
-    window.history.replaceState(null, "", nextUrl);
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState(null, "", newUrl);
   }, [
     activePresetId,
     prefixTokens,
@@ -251,31 +272,34 @@ export function CalculatorShell({
     cacheTtl,
     useCaching,
     useBatch,
-    turnsPerSession,
-    followUpUserTokens,
     useOffPeak,
     useUsResidency,
+    turnsPerSession,
+    followUpUserTokens,
   ]);
 
-  function handleSelectPreset(id: WorkloadPresetId) {
+  function handleSelectPreset(presetId: WorkloadPresetId) {
     hasInteractedRef.current = true;
-    const p = PRESET_BY_ID[id];
-    setActivePresetId(id);
-    setPrefixTokens(p.prefixTokens);
-    setDynamicInputTokens(p.dynamicInputTokens);
-    setOutputTokens(p.outputTokens);
-    setRequestsPerDay(p.requestsPerDay);
-    setCacheHitRatePct(Math.round(p.cacheHitRate * 100));
-    setCacheWritesPerHour(p.cacheWritesPerHour);
-    setCacheTtl(p.cacheTtl);
-    setUseCaching(p.useCaching);
-    setUseBatch(p.useBatch);
-    setTurnsPerSession(p.turnsPerSession);
-    setFollowUpUserTokens(p.followUpUserTokens);
-    setActiveHoursPerDay(p.activeHoursPerDay);
+    const preset = getPresetById(presetId);
+    if (!preset) return;
+
+    const input = presetToCalculatorInput(preset);
+    setActivePresetId(preset.id);
+    setPrefixTokens(input.prefixTokens);
+    setDynamicInputTokens(input.dynamicInputTokens);
+    setOutputTokens(input.outputTokens);
+    setRequestsPerDay(input.requestsPerDay);
+    setCacheHitRatePct(Math.round(input.cacheHitRate * 100));
+    setCacheWritesPerHour(input.cacheWritesPerHour);
+    setCacheTtl(input.cacheTtl);
+    setUseCaching(input.useCaching);
+    setUseBatch(input.useBatch);
+    setTurnsPerSession(input.turnsPerSession);
+    setFollowUpUserTokens(input.followUpUserTokens);
+    setActiveHoursPerDay(input.activeHoursPerDay);
   }
 
-  function markCustom<T>(setter: (v: T) => void) {
+  function markCustom<T>(setter: (val: T) => void) {
     return (value: T) => {
       hasInteractedRef.current = true;
       setActivePresetId("custom");
@@ -321,6 +345,9 @@ export function CalculatorShell({
 
   const estimates: ModelCostEstimate[] = useMemo(() => {
     const filtered = models.filter((m) => {
+      if (!includeLegacy && m.lifecycleStatus === "legacy") {
+        return false;
+      }
       if (providerFilter !== "all" && m.provider !== providerFilter) {
         return false;
       }
@@ -352,6 +379,7 @@ export function CalculatorShell({
     });
   }, [
     models,
+    includeLegacy,
     providerFilter,
     weightFilter,
     calculatorInput,
@@ -368,45 +396,27 @@ export function CalculatorShell({
     estimates[0]?.avgInputTokensPerTurn ?? prefixTokens + dynamicInputTokens;
 
   function handleCopyShareableUrl() {
-    const params = new URLSearchParams();
-    if (activePresetId !== "custom") {
-      params.set("preset", activePresetId);
-    }
-    params.set("prefix", String(prefixTokens));
-    params.set("dyn", String(dynamicInputTokens));
-    params.set("out", String(outputTokens));
-    params.set("req", String(requestsPerDay));
-    params.set("hit", String(cacheHitRatePct));
-    params.set("writes", String(cacheWritesPerHour));
-    params.set("ttl", cacheTtl);
-    params.set("cache", useCaching ? "1" : "0");
-    params.set("batch", useBatch ? "1" : "0");
-    params.set("turns", String(turnsPerSession));
-    if (turnsPerSession > 1) {
-      params.set("follow", String(followUpUserTokens));
-    }
-    if (useOffPeak) params.set("offpeak", "1");
-    if (useUsResidency) params.set("us", "1");
-
-    const fullUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
-    navigator.clipboard.writeText(fullUrl).then(() => {
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2500);
-    });
+    if (typeof window === "undefined") return;
+    navigator.clipboard
+      .writeText(window.location.href)
+      .then(() => {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2500);
+      })
+      .catch(() => {});
   }
 
   function handleExportCsv() {
-    const nowIso = new Date().toISOString();
     const csv = buildEstimatesCsv(estimates, calculatorInput, {
       presetLabel,
       registryUpdatedAt,
-      exportedAtIso: nowIso,
+      exportedAtIso: new Date().toISOString(),
     });
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `llm-cost-quote-${nowIso.slice(0, 10)}.csv`;
+    a.download = `llm-cost-quote-${presetLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -414,17 +424,16 @@ export function CalculatorShell({
   }
 
   function handleExportMarkdown() {
-    const nowIso = new Date().toISOString();
     const md = buildEstimatesMarkdown(estimates, calculatorInput, {
       presetLabel,
       registryUpdatedAt,
-      exportedAtIso: nowIso,
+      exportedAtIso: new Date().toISOString(),
     });
     const blob = new Blob([md], { type: "text/markdown;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `llm-cost-quote-${nowIso.slice(0, 10)}.md`;
+    a.download = `llm-cost-quote-${presetLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -442,6 +451,38 @@ export function CalculatorShell({
         {/* Left Column (55% width ~ col-span-7): Controls & Ergonomics */}
         <div className="space-y-6 lg:col-span-7">
           <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-5 shadow-sm sm:p-6 transition-colors space-y-6">
+            
+            {/* View Mode Segmented Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/5">
+              <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Calculator Configuration
+              </div>
+              <div className="inline-flex rounded-lg bg-slate-100 dark:bg-white/5 p-0.5 text-[11px] font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("quick")}
+                  className={`px-2.5 py-1 rounded-md transition-all ${
+                    viewMode === "quick"
+                      ? "bg-white dark:bg-[#161F30] text-slate-900 dark:text-white shadow-xs font-bold"
+                      : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  Quick Estimate
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("pro")}
+                  className={`px-2.5 py-1 rounded-md transition-all ${
+                    viewMode === "pro"
+                      ? "bg-white dark:bg-[#161F30] text-slate-900 dark:text-white shadow-xs font-bold"
+                      : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  FinOps Pro Studio
+                </button>
+              </div>
+            </div>
+
             <PresetBar
               activePresetId={activePresetId}
               onSelectPreset={handleSelectPreset}
@@ -622,19 +663,21 @@ export function CalculatorShell({
               </div>
             </div>
 
-            {/* Logical Sub-Group 1: Caching & Session Dynamics */}
+            {/* Core Caching & Optimization Controls */}
             <div className="border-t border-slate-100 dark:border-white/5 pt-5 space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 font-mono text-[11px] font-bold">
-                  3
-                </span>
-                <span className="text-xs font-semibold tracking-wider text-slate-700 dark:text-slate-300 uppercase">
-                  Caching &amp; Session Dynamics
-                </span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 font-mono text-[11px] font-bold">
+                    3
+                  </span>
+                  <span className="text-xs font-semibold tracking-wider text-slate-700 dark:text-slate-300 uppercase">
+                    Caching &amp; Optimization
+                  </span>
+                </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {/* Cache Hit Rate */}
+              {/* Core controls: Caching & Batch toggle + Hit Rate slider */}
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
                     <label
@@ -662,113 +705,165 @@ export function CalculatorShell({
                   />
                 </div>
 
-                {/* Cache Writes / Hr & TTL */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label
-                      htmlFor="input-writes-hr"
-                      className="block text-[11px] font-medium text-slate-700 dark:text-slate-300"
-                    >
-                      Writes / Hr
-                    </label>
-                    <FormattedNumberInput
-                      id="input-writes-hr"
-                      aria-label="Cache writes per hour"
-                      min={0}
-                      max={1000}
-                      disabled={!useCaching}
-                      value={cacheWritesPerHour}
-                      onChange={(val) =>
-                        markCustom(setCacheWritesPerHour)(val)
-                      }
-                      className="mt-1 w-full"
-                    />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => markCustom(setUseCaching)(!useCaching)}
+                    className={`flex-1 flex items-center justify-between p-2.5 rounded-xl border transition-all text-xs font-semibold ${
+                      useCaching
+                        ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        : "border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    <span>Prompt Caching</span>
+                    <span className="font-mono text-[10px] uppercase font-bold">
+                      {useCaching ? "Active" : "Off"}
+                    </span>
+                  </button>
 
-                  <div>
-                    <label
-                      htmlFor="select-ttl"
-                      className="block text-[11px] font-medium text-slate-700 dark:text-slate-300"
-                    >
-                      Write TTL
-                    </label>
-                    <select
-                      id="select-ttl"
-                      disabled={!useCaching}
-                      value={cacheTtl}
-                      onChange={(e) =>
-                        markCustom(setCacheTtl)(e.target.value as "5m" | "1h")
-                      }
-                      className="mt-1 w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161F30] px-2 py-1.5 font-mono text-xs text-slate-900 dark:text-slate-100 disabled:opacity-40 focus:border-emerald-500 focus:outline-none"
-                    >
-                      <option value="5m">5m / 30m</option>
-                      <option value="1h">1h / 12h</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Multi-turn controls */}
-                <div className="grid grid-cols-2 gap-2 sm:col-span-2 lg:col-span-1">
-                  <div>
-                    <label
-                      htmlFor="input-turns"
-                      className="block text-[11px] font-medium text-slate-700 dark:text-slate-300"
-                    >
-                      Turns / Session
-                    </label>
-                    <FormattedNumberInput
-                      id="input-turns"
-                      aria-label="Turns per session"
-                      min={1}
-                      max={30}
-                      value={turnsPerSession}
-                      onChange={(val) => markCustom(setTurnsPerSession)(val)}
-                      className="mt-1 w-full"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="input-followup"
-                      className="block text-[11px] font-medium text-slate-700 dark:text-slate-300"
-                    >
-                      Follow-Up User Tok
-                    </label>
-                    <FormattedNumberInput
-                      id="input-followup"
-                      aria-label="Follow up user tokens"
-                      min={0}
-                      max={50000}
-                      disabled={turnsPerSession <= 1}
-                      value={followUpUserTokens}
-                      onChange={(val) =>
-                        markCustom(setFollowUpUserTokens)(val)
-                      }
-                      className="mt-1 w-full"
-                    />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => markCustom(setUseBatch)(!useBatch)}
+                    className={`flex-1 flex items-center justify-between p-2.5 rounded-xl border transition-all text-xs font-semibold ${
+                      useBatch
+                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400"
+                        : "border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    <span>Batch API</span>
+                    <span className="font-mono text-[10px] uppercase font-bold">
+                      {useBatch ? "-50% Off" : "Sync"}
+                    </span>
+                  </button>
                 </div>
               </div>
-            </div>
 
-            {/* Logical Sub-Group 2: Pricing Modifiers Pills */}
-            <div className="border-t border-slate-100 dark:border-white/5 pt-5">
-              <PricingModifierPills
-                useCaching={useCaching}
-                onToggleCaching={markCustom(setUseCaching)}
-                useBatch={useBatch}
-                onToggleBatch={markCustom(setUseBatch)}
-                useOffPeak={useOffPeak}
-                onToggleOffPeak={(v) => {
-                  hasInteractedRef.current = true;
-                  setUseOffPeak(v);
-                }}
-                useUsResidency={useUsResidency}
-                onToggleUsResidency={(v) => {
-                  hasInteractedRef.current = true;
-                  setUseUsResidency(v);
-                }}
-              />
+              {/* Collapsible Drawer: Advanced Session & Provider Rules */}
+              {viewMode === "pro" && (
+                <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setAdvancedOpen((prev) => !prev)}
+                    className="w-full px-4 py-2.5 flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <span>Advanced Session &amp; Provider Rules</span>
+                      <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">
+                        (Write TTL, Multi-Turn Depth, DeepSeek Off-Peak, Geo Uplift)
+                      </span>
+                    </span>
+                    <span className="font-mono text-[11px] text-emerald-600 dark:text-emerald-400">
+                      {advancedOpen ? "▲ Collapse" : "▼ Expand Controls"}
+                    </span>
+                  </button>
+
+                  {advancedOpen && (
+                    <div className="p-4 border-t border-slate-200 dark:border-white/5 space-y-4">
+                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        {/* Cache Writes / Hr */}
+                        <div>
+                          <label
+                            htmlFor="input-writes-hr"
+                            className="block text-[11px] font-medium text-slate-700 dark:text-slate-300"
+                          >
+                            Writes / Hr
+                          </label>
+                          <FormattedNumberInput
+                            id="input-writes-hr"
+                            aria-label="Cache writes per hour"
+                            min={0}
+                            max={1000}
+                            disabled={!useCaching}
+                            value={cacheWritesPerHour}
+                            onChange={(val) => markCustom(setCacheWritesPerHour)(val)}
+                            className="mt-1 w-full"
+                          />
+                        </div>
+
+                        {/* Write TTL */}
+                        <div>
+                          <label
+                            htmlFor="select-ttl"
+                            className="block text-[11px] font-medium text-slate-700 dark:text-slate-300"
+                          >
+                            Write TTL
+                          </label>
+                          <select
+                            id="select-ttl"
+                            disabled={!useCaching}
+                            value={cacheTtl}
+                            onChange={(e) =>
+                              markCustom(setCacheTtl)(e.target.value as "5m" | "1h")
+                            }
+                            className="mt-1 w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161F30] px-2 py-1.5 font-mono text-xs text-slate-900 dark:text-slate-100 disabled:opacity-40 focus:border-emerald-500 focus:outline-none"
+                          >
+                            <option value="5m">5m / 30m</option>
+                            <option value="1h">1h / 12h</option>
+                          </select>
+                        </div>
+
+                        {/* Turns / Session */}
+                        <div>
+                          <label
+                            htmlFor="input-turns"
+                            className="block text-[11px] font-medium text-slate-700 dark:text-slate-300"
+                          >
+                            Turns / Session
+                          </label>
+                          <FormattedNumberInput
+                            id="input-turns"
+                            aria-label="Turns per session"
+                            min={1}
+                            max={30}
+                            value={turnsPerSession}
+                            onChange={(val) => markCustom(setTurnsPerSession)(val)}
+                            className="mt-1 w-full"
+                          />
+                        </div>
+
+                        {/* Follow-Up User Tokens */}
+                        <div>
+                          <label
+                            htmlFor="input-followup"
+                            className="block text-[11px] font-medium text-slate-700 dark:text-slate-300"
+                          >
+                            Follow-Up Tok
+                          </label>
+                          <FormattedNumberInput
+                            id="input-followup"
+                            aria-label="Follow up user tokens"
+                            min={0}
+                            max={50000}
+                            disabled={turnsPerSession <= 1}
+                            value={followUpUserTokens}
+                            onChange={(val) => markCustom(setFollowUpUserTokens)(val)}
+                            className="mt-1 w-full"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-100 dark:border-white/5">
+                        <PricingModifierPills
+                          useCaching={useCaching}
+                          onToggleCaching={markCustom(setUseCaching)}
+                          useBatch={useBatch}
+                          onToggleBatch={markCustom(setUseBatch)}
+                          useOffPeak={useOffPeak}
+                          onToggleOffPeak={(v) => {
+                            hasInteractedRef.current = true;
+                            setUseOffPeak(v);
+                          }}
+                          useUsResidency={useUsResidency}
+                          onToggleUsResidency={(v) => {
+                            hasInteractedRef.current = true;
+                            setUseUsResidency(v);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Elevated Client-Side Tokenizer Drawer */}
@@ -837,7 +932,7 @@ export function CalculatorShell({
                 }
                 className="rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161F30] px-2.5 py-1 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
               >
-                <option value="all">All 8 Providers</option>
+                <option value="all">All Providers</option>
                 <option value="openai">OpenAI</option>
                 <option value="anthropic">Anthropic</option>
                 <option value="google">Google Gemini</option>
@@ -888,6 +983,17 @@ export function CalculatorShell({
                 <option value="savings">Highest Savings %</option>
               </select>
             </div>
+
+            {/* Include Legacy Models Checkbox Toggle */}
+            <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300 select-none ml-1 bg-slate-100 dark:bg-white/5 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10">
+              <input
+                type="checkbox"
+                checked={includeLegacy}
+                onChange={(e) => setIncludeLegacy(e.target.checked)}
+                className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+              />
+              <span>Include Legacy ({models.filter((m) => m.lifecycleStatus === "legacy").length})</span>
+            </label>
           </div>
         </div>
 
@@ -906,6 +1012,31 @@ export function CalculatorShell({
           tokens on identical text than GPT-4o), and reasoning models (o1,
           DeepSeek-R1) bill hidden thinking tokens as output tokens.
         </div>
+      </div>
+
+      {/* Mobile Floating Bottom Spend Bar (< 1024px / lg:hidden) */}
+      <div className="fixed bottom-0 inset-x-0 z-40 lg:hidden border-t border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#111827]/95 backdrop-blur-md p-3 px-4 shadow-lg shadow-black/20 flex items-center justify-between">
+        <div>
+          <div className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">
+            Lowest Spend
+          </div>
+          <div className="font-mono text-base font-extrabold text-emerald-600 dark:text-emerald-400">
+            {estimates[0] ? fmtUsd(estimates[0].monthlyCostUsd) : "—"}
+            <span className="text-xs font-normal text-slate-500 dark:text-slate-400">/mo</span>
+            <span className="ml-1.5 text-[11px] font-medium text-slate-700 dark:text-slate-300 hidden sm:inline">
+              ({estimates[0]?.model.displayName})
+            </span>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            document.getElementById("live-finops-leaderboard")?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className="rounded-lg bg-emerald-500 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-600 active:scale-95 transition-all"
+        >
+          View Leaderboard →
+        </button>
       </div>
 
       <PrintQuoteView

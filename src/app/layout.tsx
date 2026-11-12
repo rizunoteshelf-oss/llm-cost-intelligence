@@ -17,10 +17,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default:
-      "LLM API Pricing Calculator 2026 - Claude 3.5 Sonnet, GPT-4o, DeepSeek V3 & Gemini 2.0",
+      "LLM API Pricing Calculator & FinOps Cost Simulator (2026)",
     template: "%s | LLM Cost Intelligence",
   },
-  description: `FinOps platform modeling real-world LLM API costs with prompt caching write/read break-even, Batch API discount stacking (up to 50% off), long-context cliffs, and multi-turn agent growth across ${registry.models.length} models and ${providerCount} providers.`,
+  description: `FinOps platform modeling real-world LLM API costs with verified prompt caching write/read break-even, 50% Batch API stacking, long-context cliffs, and multi-turn agent growth across ${registry.models.length} models and ${providerCount} providers. 100% private client-side simulation.`,
   alternates: {
     canonical: "/",
   },
@@ -28,9 +28,9 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "LLM Cost Intelligence",
     title:
-      "LLM API Pricing Calculator 2026 - Claude 3.5 Sonnet, GPT-4o, DeepSeek V3 & Gemini 2.0",
+      "LLM API Pricing Calculator & FinOps Cost Simulator (2026)",
     description:
-      "Calculate real monthly LLM API bills with verified prompt caching write/read break-even, Batch API stacking, and multi-turn agent scaling. 100% client-side FinOps.",
+      "Calculate real monthly LLM API bills with verified prompt caching write/read break-even, Batch API stacking, and multi-turn agent scaling across 20 verified models. 100% client-side FinOps.",
   },
 };
 

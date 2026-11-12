@@ -12,7 +12,6 @@ import {
   Printer,
   Sparkles,
   TrendingDown,
-  Zap,
 } from "lucide-react";
 import type { CalculatorInput, ModelCostEstimate } from "@/lib/pricing/engine";
 
@@ -42,7 +41,6 @@ export function LiveSpendLeaderboard({
   estimates,
   calculatorInput,
   presetLabel,
-  registryUpdatedAt,
   onCopyShareableUrl,
   isCopied,
   onExportCsv,
@@ -50,6 +48,7 @@ export function LiveSpendLeaderboard({
   onPrintPdf,
 }: LiveSpendLeaderboardProps) {
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [baselineTier, setBaselineTier] = useState<"flagship" | "mini">("flagship");
 
   // Filter valid estimates
   const validEstimates = useMemo(
@@ -59,38 +58,43 @@ export function LiveSpendLeaderboard({
 
   const lowestModel = validEstimates[0];
 
-  // Benchmark model: prefer Claude 3.5 Sonnet or GPT-4o
+  // Benchmark model: mapped to Current Production models per owner decision
   const frontierBenchmark = useMemo(() => {
-    return (
-      validEstimates.find(
-        (e) =>
-          e.model.apiModelId.includes("claude-3-5-sonnet") ||
-          e.model.apiModelId.includes("gpt-4o") ||
-          e.model.id.includes("sonnet") ||
-          e.model.id.includes("gpt-4o"),
-      ) || validEstimates[validEstimates.length - 1]
-    );
-  }, [validEstimates]);
+    if (validEstimates.length === 0) return null;
 
-  const isBudgetOrMini = useMemo(() => {
-    if (!frontierBenchmark) return false;
-    const name = frontierBenchmark.model.displayName.toLowerCase();
-    const id = frontierBenchmark.model.apiModelId.toLowerCase();
-    return (
-      name.includes("mini") ||
-      name.includes("haiku") ||
-      name.includes("flash") ||
-      name.includes("instant") ||
-      name.includes("8b") ||
-      id.includes("mini") ||
-      id.includes("haiku") ||
-      id.includes("flash")
-    );
-  }, [frontierBenchmark]);
+    if (baselineTier === "flagship") {
+      // Find current flagship: Claude 3.5 Sonnet, GPT-4o, or o1 (non-legacy)
+      const currentFlagships = validEstimates.filter((e) => e.model.lifecycleStatus !== "legacy");
+      return (
+        currentFlagships.find(
+          (e) =>
+            e.model.apiModelId === "claude-3-5-sonnet-latest" ||
+            e.model.apiModelId === "gpt-4o" ||
+            e.model.id.includes("claude-3-5-sonnet") ||
+            (e.model.id.includes("gpt-4o") && !e.model.id.includes("mini")),
+        ) ||
+        currentFlagships.find((e) => e.model.id.includes("o1")) ||
+        currentFlagships[currentFlagships.length - 1] ||
+        validEstimates[validEstimates.length - 1]
+      );
+    } else {
+      // Find current mini / flash: GPT-4o mini, Gemini 2.0 Flash, Claude 3.5 Haiku
+      const currentMinis = validEstimates.filter((e) => e.model.lifecycleStatus !== "legacy");
+      return (
+        currentMinis.find(
+          (e) =>
+            e.model.id === "openai/gpt-4o-mini" ||
+            e.model.id === "google/gemini-2-0-flash" ||
+            e.model.id.includes("haiku"),
+        ) ||
+        currentMinis[0] ||
+        validEstimates[0]
+      );
+    }
+  }, [validEstimates, baselineTier]);
 
-  const baselineLabel = isBudgetOrMini
-    ? "Reference Baseline"
-    : "Frontier Baseline";
+  const baselineLabel =
+    baselineTier === "flagship" ? "Frontier Baseline" : "Mini Baseline";
 
   // Representative optimization metrics across models benefiting from active modifiers
   const optimizationSummary = useMemo(() => {
@@ -103,35 +107,36 @@ export function LiveSpendLeaderboard({
         percent: 0,
         monthlyUsd: 0,
         modelName: null,
+        modifierLabel: "No active discount",
       };
     }
 
-    // If reference baseline model has active savings, use it for direct comparability
-    if (frontierBenchmark && frontierBenchmark.savingsPercent > 0.1) {
-      return {
-        percent: frontierBenchmark.savingsPercent,
-        monthlyUsd: frontierBenchmark.monthlySavingsUsd,
-        modelName: frontierBenchmark.model.displayName,
-      };
-    }
-
-    // Otherwise select the model with the highest savings
+    // Sort by savings percent descending
     const best = [...modelsWithSavings].sort(
       (a, b) => b.savingsPercent - a.savingsPercent,
     )[0];
+
     if (!best) {
       return {
         percent: 0,
         monthlyUsd: 0,
         modelName: null,
+        modifierLabel: "No active discount",
       };
     }
+
+    let modifier = "Prompt Cache";
+    if (best.batchActive && best.cacheActive) modifier = "Cache + Batch";
+    else if (best.batchActive) modifier = "Batch API -50%";
+    else if (best.offPeakActive) modifier = "Off-Peak -50%";
+
     return {
       percent: best.savingsPercent,
       monthlyUsd: best.monthlySavingsUsd,
       modelName: best.model.displayName,
+      modifierLabel: modifier,
     };
-  }, [validEstimates, frontierBenchmark]);
+  }, [validEstimates]);
 
   // Top 6 models for live leaderboard visual
   const topModels = useMemo(() => {
@@ -145,7 +150,7 @@ export function LiveSpendLeaderboard({
   }, [topModels]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" id="live-finops-leaderboard">
       {/* Sticky Header Card */}
       <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] p-5 shadow-lg shadow-slate-900/5 dark:shadow-black/40 transition-colors">
         <div className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-white/5 pb-4">
@@ -212,11 +217,37 @@ export function LiveSpendLeaderboard({
             </div>
           </div>
 
-          {/* Reference / Frontier Baseline */}
+          {/* Reference / Frontier Baseline with Segmented Toggle */}
           <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-[#161F30] p-3 flex flex-col justify-between">
             <div>
-              <div className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                {baselineLabel}
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">
+                  {baselineLabel}
+                </span>
+                <div className="inline-flex rounded-md bg-slate-200/60 dark:bg-white/10 p-0.5 text-[9px] font-semibold shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setBaselineTier("flagship")}
+                    className={`px-1.5 py-0.5 rounded transition-all ${
+                      baselineTier === "flagship"
+                        ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+                        : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    Flagship
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBaselineTier("mini")}
+                    className={`px-1.5 py-0.5 rounded transition-all ${
+                      baselineTier === "mini"
+                        ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
+                        : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    Mini
+                  </button>
+                </div>
               </div>
               <div className="mt-1 font-mono text-xl font-bold text-slate-900 dark:text-white tabular-nums">
                 {frontierBenchmark ? fmtUsd(frontierBenchmark.monthlyCostUsd) : "—"}
@@ -263,22 +294,23 @@ export function LiveSpendLeaderboard({
                     : "No active discount"
                 }
               >
-                {optimizationSummary.percent > 0.1 &&
-                optimizationSummary.monthlyUsd > 0
-                  ? `${fmtUsd(optimizationSummary.monthlyUsd, 0)}/mo (${optimizationSummary.modelName})`
+                {optimizationSummary.percent > 0.1 && optimizationSummary.modelName
+                  ? `Best: ${optimizationSummary.modelName}`
                   : "No active discount"}
               </div>
             </div>
             <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-1 border-t border-cyan-500/10 pt-1">
-              {calculatorInput.useBatch && calculatorInput.useCaching
-                ? "Cache + Batch stacked"
-                : calculatorInput.useBatch
-                  ? "Batch -50% discount"
-                  : calculatorInput.useCaching
-                    ? `${Math.round(calculatorInput.cacheHitRate * 100)}% cache hit active`
-                    : calculatorInput.useOffPeak
-                      ? "Off-Peak -50% discount"
-                      : "Sync standard rates"}
+              {optimizationSummary.percent > 0.1
+                ? `${optimizationSummary.modifierLabel} active`
+                : calculatorInput.useBatch && calculatorInput.useCaching
+                  ? "Cache + Batch stacked"
+                  : calculatorInput.useBatch
+                    ? "Batch -50% discount"
+                    : calculatorInput.useCaching
+                      ? `${Math.round(calculatorInput.cacheHitRate * 100)}% cache hit active`
+                      : calculatorInput.useOffPeak
+                        ? "Off-Peak -50% discount"
+                        : "Sync standard rates"}
             </div>
           </div>
         </div>
@@ -304,7 +336,7 @@ export function LiveSpendLeaderboard({
                   className="group relative rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] p-2.5 transition-all hover:border-slate-200 dark:hover:border-white/10"
                 >
                   <div className="flex items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-2 truncate">
+                    <div className="flex items-center gap-1.5 truncate">
                       <span
                         className={`flex h-4 w-4 shrink-0 items-center justify-center rounded text-[10px] font-mono font-bold ${
                           isFirst
@@ -320,9 +352,19 @@ export function LiveSpendLeaderboard({
                       >
                         {est.model.displayName}
                       </span>
-                      <span className="text-[10px] text-slate-400 dark:text-slate-500 hidden sm:inline">
-                        {est.model.hosting.endpointProvider}
-                      </span>
+                      {est.model.lifecycleStatus === "legacy" ? (
+                        <span className="rounded bg-amber-500/10 border border-amber-500/20 px-1 py-0.2 text-[8px] font-bold text-amber-600 dark:text-amber-400 uppercase">
+                          LEGACY
+                        </span>
+                      ) : est.model.hosting.endpointType !== "first_party" ? (
+                        <span className="rounded bg-indigo-500/10 border border-indigo-500/20 px-1 py-0.2 text-[8px] font-bold text-indigo-600 dark:text-indigo-400 uppercase">
+                          CLOUD
+                        </span>
+                      ) : (
+                        <span className="rounded bg-emerald-500/10 border border-emerald-500/20 px-1 py-0.2 text-[8px] font-bold text-emerald-600 dark:text-emerald-400 uppercase">
+                          CURRENT
+                        </span>
+                      )}
                     </div>
 
                     <div className="text-right font-mono tabular-nums">
@@ -366,6 +408,9 @@ export function LiveSpendLeaderboard({
                         -{est.savingsPercent.toFixed(1)}% vs sync
                       </span>
                     )}
+                    <span className="ml-auto text-[10px] text-slate-400 dark:text-slate-500">
+                      {fmtUsd(est.costPer1kTurnsUsd)}/1k turns
+                    </span>
                   </div>
                 </div>
               );

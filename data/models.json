@@ -55,7 +55,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://openai.com/api/pricing/",
-      "notes": "OpenAI flagship multimodal workhorse model."
+      "notes": "OpenAI flagship multimodal workhorse model.",
+      "lifecycleStatus": "current"
     },
     {
       "id": "openai/gpt-4o-mini",
@@ -109,7 +110,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://openai.com/api/pricing/",
-      "notes": "High-speed, cost-efficient small model designed for high-volume tasks."
+      "notes": "High-speed, cost-efficient small model designed for high-volume tasks.",
+      "lifecycleStatus": "current"
     },
     {
       "id": "openai/o1",
@@ -163,7 +165,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://openai.com/api/pricing/",
-      "notes": "Advanced reasoning model with chain-of-thought processing for complex STEM, coding, and multi-step logic."
+      "notes": "Advanced reasoning model with chain-of-thought processing for complex STEM, coding, and multi-step logic.",
+      "lifecycleStatus": "current"
     },
     {
       "id": "openai/o3-mini",
@@ -217,7 +220,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://openai.com/api/pricing/",
-      "notes": "Fast, cost-effective reasoning model optimized for STEM and competitive coding."
+      "notes": "Fast, cost-effective reasoning model optimized for STEM and competitive coding.",
+      "lifecycleStatus": "current"
     },
     {
       "id": "anthropic/claude-3-5-sonnet-latest",
@@ -271,7 +275,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://www.anthropic.com/pricing",
-      "notes": "Flagship intelligence model with industry-leading coding and reasoning capabilities."
+      "notes": "Flagship intelligence model with industry-leading coding and reasoning capabilities.",
+      "lifecycleStatus": "current"
     },
     {
       "id": "anthropic/claude-3-5-haiku-latest",
@@ -325,7 +330,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://www.anthropic.com/pricing",
-      "notes": "High-speed, low-latency Claude model with coding capability matching previous generation Sonnet."
+      "notes": "High-speed, low-latency Claude model with coding capability matching previous generation Sonnet.",
+      "lifecycleStatus": "current"
     },
     {
       "id": "anthropic/claude-3-opus-latest",
@@ -379,7 +385,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://www.anthropic.com/pricing",
-      "notes": "Deep analytical and synthesis model for complex workflows."
+      "notes": "Deep analytical and synthesis model for complex workflows.",
+      "lifecycleStatus": "legacy"
     },
     {
       "id": "google/gemini-1-5-pro",
@@ -444,7 +451,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://ai.google.dev/pricing",
-      "notes": "Google flagship multimodal model with 2M token context window."
+      "notes": "Google flagship multimodal model with 2M token context window.",
+      "lifecycleStatus": "legacy"
     },
     {
       "id": "google/gemini-1-5-flash",
@@ -509,7 +517,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://ai.google.dev/pricing",
-      "notes": "High-speed, cost-efficient 1M context multimodal model."
+      "notes": "High-speed, cost-efficient 1M context multimodal model.",
+      "lifecycleStatus": "legacy"
     },
     {
       "id": "google/gemini-2-0-flash",
@@ -563,7 +572,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://ai.google.dev/pricing",
-      "notes": "Next-generation multimodal model with native tool use and ultra-fast generation."
+      "notes": "Next-generation multimodal model with native tool use and ultra-fast generation.",
+      "lifecycleStatus": "current"
     },
     {
       "id": "deepseek/deepseek-chat",
@@ -621,7 +631,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://platform.deepseek.com/api-docs/pricing",
-      "notes": "DeepSeek-V3 671B MoE model with exceptional price-performance."
+      "notes": "DeepSeek-V3 671B MoE model with exceptional price-performance.",
+      "lifecycleStatus": "current"
     },
     {
       "id": "deepseek/deepseek-reasoner",
@@ -679,7 +690,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://platform.deepseek.com/api-docs/pricing",
-      "notes": "DeepSeek-R1 open reasoning model competitive with OpenAI o1."
+      "notes": "DeepSeek-R1 open reasoning model competitive with OpenAI o1.",
+      "lifecycleStatus": "current"
     },
     {
       "id": "groq/llama-3-3-70b-versatile",
@@ -729,7 +741,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://groq.com/pricing",
-      "notes": "High-throughput, ultra-low latency Llama 3.3 70B inference powered by Groq LPUs."
+      "notes": "High-throughput, ultra-low latency Llama 3.3 70B inference powered by Groq LPUs.",
+      "lifecycleStatus": "current"
     },
     {
       "id": "together/llama-3-3-70b-instruct-turbo",
@@ -779,7 +792,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://www.together.ai/pricing",
-      "notes": "Together AI serverless Turbo endpoint for Meta Llama 3.3 70B."
+      "notes": "Together AI serverless Turbo endpoint for Meta Llama 3.3 70B.",
+      "lifecycleStatus": "current"
     },
     {
       "id": "together/llama-3-1-405b-instruct-turbo",
@@ -829,7 +843,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://www.together.ai/pricing",
-      "notes": "Frontier open-weights 405B model served on Together AI high-performance cluster."
+      "notes": "Frontier open-weights 405B model served on Together AI high-performance cluster.",
+      "lifecycleStatus": "legacy"
     },
     {
       "id": "bedrock/meta-llama-3-1-405b-instruct",
@@ -881,7 +896,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://aws.amazon.com/bedrock/pricing/",
-      "notes": "Enterprise managed deployment of Meta Llama 3.1 405B on AWS Bedrock."
+      "notes": "Enterprise managed deployment of Meta Llama 3.1 405B on AWS Bedrock.",
+      "lifecycleStatus": "legacy"
     },
     {
       "id": "mistral/mistral-large-2411",
@@ -933,7 +949,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://mistral.ai/technology/#pricing",
-      "notes": "Mistral flagship reasoning and multilingual model."
+      "notes": "Mistral flagship reasoning and multilingual model.",
+      "lifecycleStatus": "current"
     },
     {
       "id": "mistral/mistral-small-latest",
@@ -985,7 +1002,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://mistral.ai/technology/#pricing",
-      "notes": "Cost-efficient lightweight open-weight model from Mistral."
+      "notes": "Cost-efficient lightweight open-weight model from Mistral.",
+      "lifecycleStatus": "current"
     },
     {
       "id": "groq/llama-3-1-8b-instant",
@@ -1035,7 +1053,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://groq.com/pricing",
-      "notes": "Ultra-fast lightweight model for low-latency tasks."
+      "notes": "Ultra-fast lightweight model for low-latency tasks.",
+      "lifecycleStatus": "legacy"
     },
     {
       "id": "bedrock/anthropic-claude-3-5-sonnet",
@@ -1089,7 +1108,8 @@
       "promotionalExpiryDate": null,
       "lastVerifiedDate": "2026-11-12",
       "officialSourceUrl": "https://aws.amazon.com/bedrock/pricing/",
-      "notes": "Claude 3.5 Sonnet hosted on AWS Bedrock with full enterprise compliance."
+      "notes": "Claude 3.5 Sonnet hosted on AWS Bedrock with full enterprise compliance.",
+      "lifecycleStatus": "current"
     }
   ]
 }

@@ -32,6 +32,7 @@ function fmtTokens(count: number): string {
 export function ModelsDirectory({ models }: ModelsDirectoryProps) {
   const [query, setQuery] = useState("");
   const [selectedProvider, setSelectedProvider] = useState<string>("all");
+  const [includeLegacy, setIncludeLegacy] = useState(false);
 
   const providers = useMemo(() => {
     const list = Array.from(new Set(models.map((m) => m.provider)));
@@ -41,6 +42,8 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
   const filteredModels = useMemo(() => {
     const q = query.trim().toLowerCase();
     return models.filter((m) => {
+      if (!includeLegacy && m.lifecycleStatus === "legacy") return false;
+
       const matchesProvider =
         selectedProvider === "all"
           ? true
@@ -59,7 +62,7 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
         m.hosting.endpointProvider.toLowerCase().includes(q)
       );
     });
-  }, [models, query, selectedProvider]);
+  }, [models, query, selectedProvider, includeLegacy]);
 
   return (
     <div className="space-y-6">
@@ -76,8 +79,8 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
           />
         </div>
 
-        {/* Category Pills */}
-        <div className="flex flex-wrap items-center gap-1.5 text-xs">
+        {/* Category Pills & Legacy Filter */}
+        <div className="flex flex-wrap items-center gap-2 text-xs">
           {providers.map((p) => {
             const label =
               p === "all"
@@ -110,18 +113,29 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
           >
             Open Weights
           </button>
+
+          <label className="inline-flex items-center gap-1.5 cursor-pointer rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors select-none">
+            <input
+              type="checkbox"
+              checked={includeLegacy}
+              onChange={(e) => setIncludeLegacy(e.target.checked)}
+              className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+            />
+            <span>Include Legacy ({models.filter((m) => m.lifecycleStatus === "legacy").length})</span>
+          </label>
         </div>
       </div>
 
       <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">
         Showing <strong>{filteredModels.length}</strong> of{" "}
-        <strong>{models.length}</strong> production models
+        <strong>{models.length}</strong> models {!includeLegacy && "(legacy models filtered)"}
       </div>
 
       {/* Models Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredModels.map((model) => {
           const primaryTier = model.pricingTiers[0];
+          if (!primaryTier) return null;
           const hasTiers = model.pricingTiers.length > 1;
 
           return (
@@ -136,6 +150,15 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
                       <span className="inline-block rounded-md bg-slate-100 dark:bg-white/10 px-2 py-0.5 text-[10px] font-mono font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                         {model.provider}
                       </span>
+                      {model.lifecycleStatus === "legacy" ? (
+                        <span className="inline-block rounded-md bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                          Legacy
+                        </span>
+                      ) : (
+                        <span className="inline-block rounded-md bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                          Current
+                        </span>
+                      )}
                       {model.openWeight && (
                         <span className="inline-block rounded-md bg-indigo-500/10 px-2 py-0.5 text-[10px] font-mono font-semibold text-indigo-600 dark:text-indigo-400">
                           Open-Weight
@@ -160,53 +183,79 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
                   </span>
                 </div>
 
-                <div className="rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-[#161F30] p-3 space-y-1.5 text-xs font-mono">
-                  <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
-                    <span className="font-sans">Input (Standard):</span>
-                    <span className="font-bold text-slate-900 dark:text-white tabular-nums">
-                      {fmtRate(primaryTier?.inputPer1M)} / 1M
-                      {hasTiers ? " *" : ""}
-                    </span>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
+                  {model.notes}
+                </p>
+
+                {/* Primary Pricing Rates */}
+                <div className="rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-[#161F30] p-3">
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="block text-[10px] text-slate-400 dark:text-slate-500">
+                        Input / 1M
+                      </span>
+                      <span className="font-mono font-bold text-slate-900 dark:text-white">
+                        {fmtRate(primaryTier.inputPer1M)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block text-[10px] text-slate-400 dark:text-slate-500">
+                        Output / 1M
+                      </span>
+                      <span className="font-mono font-bold text-slate-900 dark:text-white">
+                        {fmtRate(primaryTier.outputPer1M)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
-                    <span className="font-sans">Output:</span>
-                    <span className="font-bold text-slate-900 dark:text-white tabular-nums">
-                      {fmtRate(primaryTier?.outputPer1M)} / 1M
-                      {hasTiers ? " *" : ""}
-                    </span>
-                  </div>
-                  {primaryTier?.cachedInputReadPer1M != null && (
-                    <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400">
-                      <span className="font-sans">Cached Read:</span>
-                      <span className="font-bold tabular-nums">
-                        {fmtRate(primaryTier.cachedInputReadPer1M)} / 1M
+
+                  {primaryTier.cachedInputReadPer1M !== null && (
+                    <div className="mt-2 pt-2 border-t border-slate-200 dark:border-white/5 flex items-center justify-between text-[11px]">
+                      <span className="text-slate-500 dark:text-slate-400">
+                        Cached read / 1M:
+                      </span>
+                      <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                        {fmtRate(primaryTier.cachedInputReadPer1M)}
                       </span>
                     </div>
                   )}
-                  {model.batchApi.supported && (
-                    <div className="flex justify-between items-center text-cyan-600 dark:text-cyan-400">
-                      <span className="font-sans">Batch API:</span>
-                      <span className="font-semibold tabular-nums">
-                        -{model.batchApi.discountPercent}% ({model.batchApi.turnaroundWindow ?? "24h"})
-                      </span>
+
+                  {hasTiers && (
+                    <div className="mt-2 text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                      * Multiple context tiers available (&gt;128K tokens)
                     </div>
                   )}
                 </div>
 
-                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                  {model.notes}
-                </p>
+                {/* Badges for Caching & Batch */}
+                <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono">
+                  {model.promptCaching.supported ? (
+                    <span className="rounded bg-emerald-500/10 px-2 py-0.5 text-emerald-600 dark:text-emerald-400 font-medium">
+                      Caching: {model.promptCaching.mode}
+                    </span>
+                  ) : (
+                    <span className="rounded bg-slate-100 dark:bg-white/5 px-2 py-0.5 text-slate-400">
+                      No caching
+                    </span>
+                  )}
+
+                  {model.batchApi.supported && (
+                    <span className="rounded bg-cyan-500/10 px-2 py-0.5 text-cyan-600 dark:text-cyan-400 font-medium">
+                      Batch {model.batchApi.discountPercent ? `-${model.batchApi.discountPercent}%` : "0%"}
+                    </span>
+                  )}
+                </div>
               </div>
 
+              {/* Card Footer */}
               <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs">
-                <span className="text-slate-400 dark:text-slate-500 font-mono text-[11px]">
-                  Host: {model.hosting.endpointProvider}
+                <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                  Verified {model.lastVerifiedDate}
                 </span>
                 <Link
                   href={`/models/${model.slug}/`}
-                  className="inline-flex items-center gap-1 font-semibold text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 transition-colors"
+                  className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
                 >
-                  <span>Rate Card &amp; Rules</span>
+                  <span>Detailed Rate Card</span>
                   <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>
@@ -214,27 +263,6 @@ export function ModelsDirectory({ models }: ModelsDirectoryProps) {
           );
         })}
       </div>
-
-      {filteredModels.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-slate-300 dark:border-white/20 p-12 text-center">
-          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-            No models match &ldquo;{query}&rdquo;
-          </p>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Try searching for another model name, provider, or clear your filters.
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              setQuery("");
-              setSelectedProvider("all");
-            }}
-            className="mt-4 rounded-lg bg-slate-900 dark:bg-white px-4 py-2 text-xs font-semibold text-white dark:text-slate-900 hover:bg-slate-800"
-          >
-            Reset Filters
-          </button>
-        </div>
-      )}
     </div>
   );
 }

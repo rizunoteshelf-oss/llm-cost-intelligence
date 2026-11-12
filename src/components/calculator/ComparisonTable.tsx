@@ -97,6 +97,15 @@ export function ComparisonTable({ estimates }: ComparisonTableProps) {
                         model.displayName
                       )}
                     </span>
+                    {model.lifecycleStatus === "legacy" ? (
+                      <span className="rounded bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 text-[9px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                        Legacy
+                      </span>
+                    ) : (
+                      <span className="rounded bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                        Current
+                      </span>
+                    )}
                     {model.openWeight && (
                       <span className="rounded bg-indigo-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-600 dark:text-indigo-400">
                         Open-Weight

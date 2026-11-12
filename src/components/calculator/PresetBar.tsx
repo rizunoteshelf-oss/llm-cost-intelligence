@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   BookOpen,
   Bot,
@@ -42,7 +41,8 @@ function fmtCompactTokens(count: number): string {
 }
 
 export function PresetBar({ activePresetId, onSelectPreset }: PresetBarProps) {
-  const [hoveredPreset, setHoveredPreset] = useState<WorkloadPresetId | null>(null);
+  const activePreset = WORKLOAD_PRESETS.find((p) => p.id === activePresetId);
+  const activeEditorial = activePreset ? PRESET_EDITORIAL[activePreset.id] : null;
 
   return (
     <div className="space-y-3">
@@ -71,39 +71,34 @@ export function PresetBar({ activePresetId, onSelectPreset }: PresetBarProps) {
       <div
         role="group"
         aria-label="Workload presets"
-        className="grid grid-cols-2 sm:grid-cols-3 gap-3"
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5"
       >
         {WORKLOAD_PRESETS.map((preset) => {
           const isActive = activePresetId === preset.id;
           const Icon = PRESET_ICONS[preset.id] || Sparkles;
-          const editorial = PRESET_EDITORIAL[preset.id];
           const totalInTokens = preset.prefixTokens + preset.dynamicInputTokens;
 
           return (
-            <div
+            <button
               key={preset.id}
-              className="relative"
-              onMouseEnter={() => setHoveredPreset(preset.id)}
-              onMouseLeave={() => setHoveredPreset(null)}
+              type="button"
+              onClick={() => onSelectPreset(preset.id)}
+              className={`group relative flex w-full flex-col justify-between rounded-xl border p-3 text-left transition-all ${
+                isActive
+                  ? "border-emerald-500/60 bg-emerald-500/10 dark:bg-emerald-500/15 text-slate-900 dark:text-white shadow-xs ring-1 ring-emerald-500/40"
+                  : "border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-[#161F30]"
+              }`}
             >
-              <button
-                type="button"
-                onClick={() => onSelectPreset(preset.id)}
-                className={`group relative flex w-full flex-col items-start rounded-xl border p-3.5 text-left transition-all ${
-                  isActive
-                    ? "border-emerald-500/60 bg-emerald-500/10 dark:bg-emerald-500/15 text-slate-900 dark:text-white shadow-xs ring-1 ring-emerald-500/40"
-                    : "border-slate-200 dark:border-white/10 bg-white dark:bg-[#111827] text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-[#161F30]"
-                }`}
-              >
+              <div>
                 <div className="flex w-full items-center justify-between gap-1.5">
                   <div
-                    className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
+                    className={`flex h-6 w-6 items-center justify-center rounded-lg transition-colors ${
                       isActive
                         ? "bg-emerald-500 text-white shadow-xs"
                         : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white"
                     }`}
                   >
-                    <Icon className="h-3.5 w-3.5" />
+                    <Icon className="h-3 w-3" />
                   </div>
                   {isActive && (
                     <span className="rounded-full bg-emerald-500/20 px-1.5 py-0.5 font-mono text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
@@ -112,11 +107,11 @@ export function PresetBar({ activePresetId, onSelectPreset }: PresetBarProps) {
                   )}
                 </div>
 
-                <div className="mt-2.5 space-y-1 w-full">
-                  <span className="block text-xs font-bold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-sm">
+                <div className="mt-2 space-y-0.5 w-full">
+                  <span className="block text-xs font-bold leading-tight tracking-tight text-slate-900 dark:text-white truncate">
                     {preset.name}
                   </span>
-                  <div className="flex items-center gap-1 font-mono text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center gap-1 font-mono text-[10px] sm:text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
                     <span className="text-emerald-600 dark:text-emerald-400 font-medium">
                       {fmtCompactTokens(totalInTokens)} in
                     </span>
@@ -126,33 +121,39 @@ export function PresetBar({ activePresetId, onSelectPreset }: PresetBarProps) {
                     </span>
                   </div>
                 </div>
+              </div>
 
-                <div className="mt-2 flex items-center justify-between w-full text-[10px] text-slate-400 dark:text-slate-500 font-mono border-t border-slate-100 dark:border-white/5 pt-1.5">
-                  <span>{fmtCompactTokens(preset.requestsPerDay)} req/d</span>
-                  <span>{Math.round(preset.cacheHitRate * 100)}% hit</span>
-                </div>
-              </button>
-
-              {/* Hover Tooltip / Profile Drawer */}
-              {hoveredPreset === preset.id && editorial && (
-                <div className="pointer-events-none absolute left-0 top-full z-40 mt-1.5 w-72 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-900/95 dark:bg-[#0B101D]/95 p-3.5 text-white shadow-xl backdrop-blur-sm transition-opacity hidden sm:block">
-                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
-                    <HelpCircle className="h-3 w-3" />
-                    <span>Traffic Profile: {preset.name}</span>
-                  </div>
-                  <p className="mt-1.5 text-[11px] leading-relaxed text-slate-300">
-                    {editorial.summary}
-                  </p>
-                  <div className="mt-2.5 border-t border-white/10 pt-1.5 font-mono text-[10px] text-slate-400 flex items-center justify-between">
-                    <span>Prefix: {preset.prefixTokens.toLocaleString()} tok</span>
-                    <span>Output: {preset.outputTokens.toLocaleString()} tok</span>
-                  </div>
-                </div>
-              )}
-            </div>
+              <div className="mt-2 flex items-center justify-between w-full text-[10px] text-slate-400 dark:text-slate-500 font-mono border-t border-slate-100 dark:border-white/5 pt-1.5">
+                <span>{fmtCompactTokens(preset.requestsPerDay)} req/d</span>
+                <span>{Math.round(preset.cacheHitRate * 100)}% hit</span>
+              </div>
+            </button>
           );
         })}
       </div>
+
+      {/* Dedicated Inline Contextual Profile Bar (Zero Tooltip Occlusion) */}
+      {activeEditorial && activePreset ? (
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition-colors">
+          <div className="flex items-start sm:items-center gap-2">
+            <HelpCircle className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5 sm:mt-0" />
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
+              <strong className="text-slate-900 dark:text-white font-semibold">
+                {activePreset.name}:
+              </strong>{" "}
+              {activeEditorial.summary}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0 font-mono text-[10px] sm:text-[11px]">
+            <span className="rounded-md border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-cyan-600 dark:text-cyan-400 font-medium">
+              Prefix: {activePreset.prefixTokens.toLocaleString()} tok
+            </span>
+            <span className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-emerald-600 dark:text-emerald-400 font-medium">
+              Output: {activePreset.outputTokens.toLocaleString()} tok
+            </span>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
