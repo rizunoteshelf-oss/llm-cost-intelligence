@@ -27,23 +27,25 @@ export function AdSlot({
 }: AdSlotProps) {
   const enabled = process.env.NEXT_PUBLIC_ENABLE_ADSENSE === "true";
   const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ?? "";
+  const resolvedSlotId = process.env.NEXT_PUBLIC_ADSENSE_SLOT_ID || slotId;
+  const hasNumericSlot = /^\d+$/.test(resolvedSlotId);
 
   useEffect(() => {
-    if (!enabled || !clientId) return;
+    if (!enabled || !clientId || !hasNumericSlot) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch {
       // Ignore AdSense push errors if script is blocked by client extensions
     }
-  }, [enabled, clientId, slotId]);
+  }, [enabled, clientId, hasNumericSlot, resolvedSlotId]);
 
-  if (!enabled || !clientId) {
+  if (!enabled || !clientId || !hasNumericSlot) {
     return null;
   }
 
   return (
     <aside
-      data-ad-slot={slotId}
+      data-ad-slot={resolvedSlotId}
       aria-label="Advertisement"
       className={`no-print mt-12 mb-8 rounded-xl border border-slate-200 bg-slate-50/80 p-4 ${className}`}
     >
@@ -55,7 +57,7 @@ export function AdSlot({
           className="adsbygoogle block w-full"
           style={{ display: "block" }}
           data-ad-client={clientId}
-          data-ad-slot={slotId}
+          data-ad-slot={resolvedSlotId}
           data-ad-format={format}
           data-full-width-responsive="true"
         />
